@@ -55,6 +55,7 @@ FILES =  \
 	IFsGateway.cs \
 	SugarDatastore.cs \
 	OlpcMetadata.cs \
+	FsXml.cs \
 	#
 
 #	Sequence.cs \
