@@ -75,7 +75,6 @@ namespace FsGateway
 			if (namespaces.Keys!=null) {
 				IEnumerator<string> itKey=namespaces.Keys.GetEnumerator();
 				while (itKey.MoveNext()) {
-					Console.Out.WriteLine("KEY: "+itKey.Current+" value: "+namespaces[itKey.Current]);
 					nsm.AddNamespace(itKey.Current,namespaces[itKey.Current]);
 				}
 			}
@@ -151,7 +150,6 @@ namespace FsGateway
 		public Errno OnReadDirectory (string directory, OpenedPathInfo info,
 		                                          out IEnumerable<DirectoryEntry> names)
 		{
-Console.WriteLine("OnReadDirectory: "+directory);
 			XmlNode node=document.SelectSingleNode(directory,nsm);
 
 			List<string> listPath=analyzeNode(node);
@@ -199,7 +197,6 @@ Console.WriteLine("OnReadDirectory: "+directory);
 		public Errno OnGetPathStatus (string path, ref Stat stbuf)
 		{
 			stbuf = new Stat ();
-Console.WriteLine("OnGetPathStatus of "+path);
 			stbuf.st_uid = uid;
 			stbuf.st_gid = gid;
 
