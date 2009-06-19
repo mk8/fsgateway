@@ -3,6 +3,7 @@ using System.Data;
 using System.Collections.Generic;
 using Npgsql;
 using Mono.Fuse;
+using System.Text.RegularExpressions;
 
 namespace FsGateway
 {
@@ -13,6 +14,9 @@ namespace FsGateway
 		private IDbConnection dbcon=null;
 		private string connectionString=null;
 		private bool _isConnected=false;
+		private int version_number_release=0; // e.s. 8.x.x
+		private int version_number_major=0; // e.s. x.3.0
+		private int version_number_minor=0; // e.s. x.x.0
 		
 		public Postgresql()
 		{
@@ -51,11 +55,65 @@ namespace FsGateway
 				this.connectionString=connectionString;
 				res=true;
 				_isConnected=true;
+				
+				readVersionNumber();
+				
 			} catch (Exception ex) {
 				System.Console.Out.WriteLine("Exception during database connection opening. Error message: "+ex.Message);
 				dbcon=null;
 			}
 			return res;
+		}
+		
+		private string readVersionNumber() {
+			string sql="select version()";
+			string version="";
+			
+			IDbCommand dbcmd = dbcon.CreateCommand();
+			
+			dbcmd.CommandText = sql;
+			IDataReader reader = dbcmd.ExecuteReader();
+			if (!reader.Read()) {
+				reader.Close();
+				return null;
+			}
+
+			// Get the version number
+			version=reader.GetString(0);
+
+			// Parse the version number string to get the single part
+			Regex fileMultipleRegex = null;
+			
+			try {
+				fileMultipleRegex = new Regex(@"(?<postgres>[^ ]+) ((?<numberVersion>[0-9]+)\.(?<numberMajor>[0-9]+)\.(?<numberMinor>[0-9]+))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+			} catch (Exception ex) {
+				System.Console.WriteLine("Exception during the Regex creation: "+ex.Message);
+			}
+			
+			// Check for namefile with number
+			int index=0;
+			if (fileMultipleRegex!=null) {
+
+				Match match=null;
+				try {
+					match = fileMultipleRegex.Match(version);
+				} catch (Exception ex) {
+					System.Console.WriteLine("Exception during match routine. Message: "+ex.Message);
+				}
+
+				try {
+					if (match != null && match.Success) {					
+						version_number_release =System.Int32.Parse(match.Groups["numberVersion"].Value);
+						version_number_major =System.Int32.Parse(match.Groups["numberMajor"].Value);
+						version_number_minor =System.Int32.Parse(match.Groups["numberMinor"].Value);
+					}
+				} catch (Exception ex) {
+					Console.WriteLine("Exception: "+ex.Message);
+				}
+			}
+			
+			reader.Close();
+			return version;
 		}
 		
 		public bool Unconnect() {
@@ -80,6 +138,8 @@ namespace FsGateway
 		public SortedList<string,Table> getTables() {
 
 			SortedList<string,Table> tableList=null;
+			string sql;
+			IDataReader reader=null;
 			
 			// Check for DB Connection
 			if (dbcon!=null) {
@@ -87,54 +147,171 @@ namespace FsGateway
 				tableList=new SortedList<string,Table>();
 
 				IDbCommand dbcmd = dbcon.CreateCommand();
-				string sql = "SELECT n.nspname as SCHEMA "
-					       + "     , c.relname as NAME "
-						   + "     , CASE c.relkind "
-						   + "            WHEN 'r' THEN 'table' "
-						   + "            WHEN 'v' THEN 'view' "
-						   + "            WHEN 'i' THEN 'index' "
-						   + "            WHEN 'S' THEN 'sequence' "
-						   + "            WHEN 's' THEN 'special' "
-						   + "       END as TYPE "
-						   + "     , u.usename as OWNER "
-						   + "FROM pg_catalog.pg_class c "
-						   + "LEFT JOIN pg_catalog.pg_user u ON u.usesysid = c.relowner "
-						   + "LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
-						   + "WHERE c.relkind IN ('r','') "
-						   + "  AND n.nspname NOT IN ('pg_catalog', 'pg_toast') "
-						   + "  AND pg_catalog.pg_table_is_visible(c.oid) "
-						   + "ORDER BY 1,2";
-				sql = "SELECT c.tableoid "
-					+ "     , c.oid "
-					+ "     , relname "
-					+ "     , relacl "
-					+ "     , relkind "
-					+ "     , relowner as rolname "
-					+ "     , relchecks "
-					+ "     , reltriggers "
-					+ "     , relhasindex "
-					+ "     , relhasrules "
-					+ "     , relhasoids "
-					+ "     , d.refobjid as owning_tab "
-					+ "     , d.refobjsubid as owning_col "
-					+ "     , t.spcname as reltablespace "
-					+ "     , n.nspname as namespace "
-					+ "     , array_to_string(c.reloptions, ', ') as reloptions "
-					+ "from pg_class c "
-					+ "left join pg_depend d on (c.relkind = 'S' and d.classid = c.tableoid and d.objid = c.oid and d.objsubid = 0 and d.refclassid = c.tableoid and d.deptype = 'a') "
-					+ "left join pg_tablespace t on t.oid = c.reltablespace "
-					+ "left join pg_namespace n on n.oid = c.relnamespace "
-					+ "where relkind = 'r' "
-				//	+ "  AND pg_catalog.pg_table_is_visible(c.oid) "
-					+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-					+ "order by n.nspname, relname";
-				dbcmd.CommandText = sql;
-				IDataReader reader = dbcmd.ExecuteReader();
-				while(reader.Read()) {
-					Table table=new Table(reader.GetInt64(reader.GetOrdinal("oid")),reader.GetString(reader.GetOrdinal("namespace")),reader.GetString(reader.GetOrdinal("relname")));
-					tableList.Add(table.ToString(), table);
+				if (version_number_release == 8 && version_number_major >= 2) {
+					sql = "SELECT c.tableoid "
+						+ "     , c.oid "
+						+ "     , relname "
+						+ "     , relacl "
+						+ "     , relkind "
+						+ "     , relowner as rolname "
+						+ "     , relchecks "
+						+ "     , reltriggers "
+						+ "     , relhasindex "
+						+ "     , relhasrules "
+						+ "     , relhasoids "
+						+ "     , d.refobjid as owning_tab "
+						+ "     , d.refobjsubid as owning_col "
+						+ "     , t.spcname as reltablespace "
+						+ "     , n.nspname as namespace "
+						+ "     , array_to_string(c.reloptions, ', ') as reloptions "
+						+ "from pg_class c "
+						+ "left join pg_depend d on (c.relkind = 'S' and d.classid = c.tableoid and d.objid = c.oid and d.objsubid = 0 and d.refclassid = c.tableoid and d.deptype = 'a') "
+						+ "left join pg_tablespace t on t.oid = c.reltablespace "
+						+ "left join pg_namespace n on n.oid = c.relnamespace "
+						+ "where relkind = 'r' "
+					//	+ "  AND pg_catalog.pg_table_is_visible(c.oid) "
+						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
+						+ "order by n.nspname, relname";
+				} else if (version_number_release == 8) {
+					sql = "SELECT c.tableoid "
+						+ "     , c.oid "
+						+ "     , relname "
+						+ "     , relacl "
+						+ "     , relkind "
+						+ "     , relnamespace "
+						+ "     , relowner as rolname "
+						+ "     , relchecks "
+						+ "     , reltriggers "
+						+ "     , relhasindex "
+						+ "     , relhasrules "
+						+ "     , relhasoids "
+						+ "     , d.refobjid as owning_tab "
+						+ "     , d.refobjsubid as owning_col "
+						+ "     , (SELECT spcname FROM pg_tablespace t WHERE t.oid = c.reltablespace) AS reltablespace "
+						+ "     , n.nspname as namespace "
+						+ "     , NULL as reloptions  "
+						+ "from pg_class c "
+						+ "left join pg_depend d "
+						+ "  on (c.relkind = 'S' and d.classid = c.tableoid and d.objid = c.oid and d.objsubid = 0 and d.refclassid = c.tableoid and d.deptype = 'i') "
+						+ "left join pg_namespace n on n.oid = c.relnamespace "
+						+ "where relkind = 'r' "
+						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
+						+ "order by c.oid "
+						;
+				} else if (version_number_release == 7 && version_number_major >= 3) {
+					sql = "SELECT c.tableoid "
+						+ "     , c.oid "
+						+ "     , relname "
+						+ "     , relacl "
+						+ "     , relkind "
+						+ "     , relnamespace "
+						+ "     , relowner as rolname "
+						+ "     , relchecks "
+						+ "     , reltriggers "
+						+ "     , relhasindex "
+						+ "     , relhasrules "
+						+ "     , relhasoids "
+						+ "     , d.refobjid as owning_tab "
+						+ "     , d.refobjsubid as owning_col "
+						+ "     , NULL AS reltablespace "
+						+ "     , n.nspname as namespace "
+						+ "     , NULL as reloptions  "
+						+ "from pg_class c "
+						+ "left join pg_depend d "
+						+ "  on (c.relkind = 'S' and d.classid = c.tableoid and d.objid = c.oid and d.objsubid = 0 and d.refclassid = c.tableoid and d.deptype = 'i') "
+						+ "left join pg_namespace n on n.oid = c.relnamespace "
+						+ "where relkind = 'r' "
+						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
+						+ "order by c.oid "
+						;
+				} else if (version_number_release == 7 && version_number_major >= 2) {
+					sql = "SELECT c.tableoid "
+						+ "     , c.oid "
+						+ "     , relname "
+						+ "     , relacl "
+						+ "     , relkind "
+						+ "     , relnamespace "
+						+ "     , relowner as rolname "
+						+ "     , relchecks "
+						+ "     , reltriggers "
+						+ "     , relhasindex "
+						+ "     , relhasrules "
+						+ "     , relhasoids "
+						+ "     , NULL::oid as owning_tab "
+						+ "     , NULL::int4 as owning_col "
+						+ "     , NULL AS reltablespace "
+						+ "     , n.nspname as namespace "
+						+ "     , NULL as reloptions  "
+						+ "from pg_class c "
+						+ "left join pg_namespace n on n.oid = c.relnamespace "
+						+ "where relkind = 'r' "
+						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
+						+ "order by c.oid "
+						;
+				} else if (version_number_release == 7 && version_number_major >= 1) {
+					sql = "SELECT c.tableoid "
+						+ "     , c.oid "
+						+ "     , relname "
+						+ "     , relacl "
+						+ "     , relkind "
+						+ "     , 0::oid as relnamespace "
+						+ "     , relowner as rolname "
+						+ "     , relchecks "
+						+ "     , reltriggers "
+						+ "     , relhasindex "
+						+ "     , relhasrules "
+						+ "     , relhasoids "
+						+ "     , NULL::oid as owning_tab "
+						+ "     , NULL::int4 as owning_col "
+						+ "     , NULL AS reltablespace "
+						+ "     , n.nspname as namespace "
+						+ "     , NULL as reloptions  "
+						+ "from pg_class c "
+						+ "left join pg_namespace n on n.oid = c.relnamespace "
+						+ "where relkind = 'r' "
+						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
+						+ "order by c.oid "
+						;
+				} else {
+					sql = "SELECT (SELECT oid FROM pg_class WHERE relname = 'pg_class') AS tableoid "
+						+ "     , oid "
+						+ "     , relname "
+						+ "     , relacl "
+						+ "     , CASE WHEN relhasrules and relkind = 'r' and EXISTS(SELECT rulename FROM pg_rewrite r WHERE r.ev_class = c.oid AND r.ev_type = '1') "
+						+ "                 THEN '%c'::\"char\" "
+						+ "                 ELSE relkind END AS relkind "
+						+ "     , 0::oid as relnamespace "
+						+ "     , (relowner) as rolname "
+						+ "     , relchecks "
+						+ "     , reltriggers "
+						+ "     , relhasindex "
+						+ "     , relhasrules "
+						+ "     , 't'::bool as relhasoids "
+						+ "     , NULL::oid as owning_tab "
+						+ "     , NULL::int4 as owning_col "
+						+ "     , NULL as reltablespace "
+						+ "     , n.nspname as namespace "
+						+ "     , NULL as reloptions "
+						+ "from pg_class c "
+						+ "left join pg_namespace n on n.oid = c.relnamespace "
+						+ "where relkind = 'r' "
+						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
+						+ "order by oid"
+						;
 				}
 				
+				try {
+					dbcmd.CommandText = sql;
+					reader = dbcmd.ExecuteReader();
+					while(reader.Read()) {
+						Table table=new Table(reader.GetInt64(reader.GetOrdinal("oid")),reader.GetString(reader.GetOrdinal("namespace")),reader.GetString(reader.GetOrdinal("relname")));
+						tableList.Add(table.ToString(), table);
+					}
+				} catch (Exception ex) {
+					Console.WriteLine("Exception reading of the tables list : "+ex.Message);
+					Console.WriteLine("Postgresql Version: "+version_number_release+"."+version_number_major+"."+version_number_minor);
+					Console.WriteLine("List tables: SQL=" + sql);
+				}
 				reader.Close();				
 				
 				// ReRead data for fetching detail
@@ -157,24 +334,37 @@ namespace FsGateway
 						+ "where a.attnum > 0::pg_catalog.int2 "
 						+ "  and a.attrelid = "+table.Id+ " "
 						+ "order by a.attnum ";
-					dbcmd.CommandText = sql;
-					reader = dbcmd.ExecuteReader();
-					while (reader.Read()) {
-						Field field=new Field(reader.GetString(reader.GetOrdinal("attname")),reader.GetString(reader.GetOrdinal("atttypname")));
+					string listFilesStr="";
+					try {
+						dbcmd.CommandText = sql;
+						reader = dbcmd.ExecuteReader();
+						listFilesStr="";
+						while (reader.Read()) {
+							if (!reader.IsDBNull(reader.GetOrdinal("atttypname"))) {
+								listFilesStr += "Row number: "+reader.GetValue(0).ToString()+"\n";
+								listFilesStr += "Row name: "+reader.GetValue(reader.GetOrdinal("attname")).ToString();
+								Field field=new Field(reader.GetString(reader.GetOrdinal("attname")),reader.GetString(reader.GetOrdinal("atttypname")));	
+								table.Fields.Add(field.Name,field);
+							}
+						}
+	
+						reader.Close();
 
-						table.Fields.Add(field.Name,field);
+						table.Script = "CREATE TABLE "+table.ToString()+"\n"
+							+ "(\t";
+						string separator="";
+						foreach (Field field in table.Fields.Values) {
+							table.Script += separator+field.Name+"\t"+field.Type;
+							separator=",\n\t";
+						}
+						table.Script += "\n);\n";
+						
+					} catch (Exception ex) {
+						Console.WriteLine("Exception reading the tables fields detail for table: " + table.ToString()+ " message : "+ex.Message);
+						Console.WriteLine("SQL used: "+sql);
+						Console.WriteLine("FIELDS: "+listFilesStr);
 					}
 
-					reader.Close();
-					
-					table.Script = "CREATE TABLE "+table.ToString()+"\n"
-						+ "(\t";
-					string separator="";
-					foreach (Field field in table.Fields.Values) {
-						table.Script += separator+field.Name+"\t"+field.Type;
-						separator=",\n\t";
-					}
-					table.Script += "\n);\n";
 				}
 				
 				// clean up
