@@ -38,6 +38,24 @@ namespace FsGateway
 			_isConnected=false;
 		}
 		
+		public string storageType {
+			get {
+				return "postgresql";
+			}
+		}
+
+		public string Usage {
+			get {
+				return "Specify the connection parameter like this one: \"Server=localhost; Database=mydb; User ID=username;Password=password;Port=5432;";
+			}
+		}
+		
+		public bool isConnect {
+			get {
+				return _isConnected;
+			}
+		}
+		
 		public bool Connect() {
 			return Connect(this.connectionString);
 		}
@@ -116,7 +134,7 @@ namespace FsGateway
 			return version;
 		}
 		
-		public bool Unconnect() {
+		public void Unconnect() {
 			bool res=false;
 			
 			if (dbcon!=null && dbcon.State==System.Data.ConnectionState.Open) {
@@ -126,13 +144,7 @@ namespace FsGateway
 			}
 			
 			_isConnected=true;
-			return res;
-		}
-		
-		public bool isConnected {
-			get {
-				return _isConnected;
-			}
+			return;
 		}
 		
 		public SortedList<string,Table> getTables() {

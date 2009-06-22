@@ -210,7 +210,7 @@ namespace FsGateway
 		}
 */		
 		public static void PrintUsage(List<Type> modules) {
-			IFsGateway fsGw;
+			IFsModule fsModule;
 			System.Console.Out.WriteLine("FsGateway version 0.0.1.");
 			System.Console.Out.WriteLine("FsGateway usage\n");
 			System.Console.Out.WriteLine("\tmono fsgateway storagetype connection_string [fuse_option] mountpoint\n");
@@ -218,27 +218,24 @@ namespace FsGateway
 			foreach (Type type in modules) {
 				System.Reflection.ConstructorInfo ci=type.GetConstructor(new Type[0]);
 				if (ci!=null) {
-					fsGw=(IFsGateway)ci.Invoke(null);
-					System.Console.Out.WriteLine("\t"+fsGw.storageType+"\t"+fsGw.Usage);
+					fsModule=(IFsModule)ci.Invoke(null);
+					if (fsModule.storageType!=null) {
+						System.Console.Out.WriteLine("\t"+fsModule.storageType+"\t"+fsModule.Usage);
+					}
 				}
 			}
-
-//			System.Console.Out.WriteLine("\tstoragetype\tis the type of storage. For now is postgresql");
-//			System.Console.Out.WriteLine("\tconnection_string\tis the string used to connect to the dbms");
-//			System.Console.Out.WriteLine("\tfuse_option\tis additional option passed to fuse");
-//			System.Console.Out.WriteLine("\tmountpoint\tis where the new filesystem will be mounted\n\n");
 		}
 		
 		public static void Main(string[] args)
 		{
 			List<Type> modules=new List<Type>();
-			IFsGateway fsGw=null;
+			IFsModule fsModule=null;
 			
 			// Check for all the IFsGateway implementation in the main assemply
 			FsGateway obj=new FsGateway();			
 			Type[] types=obj.GetType().Assembly.GetTypes();
 			foreach (Type type in types) {
-				if (type.GetInterface("IFsGateway")!=null) {
+				if (type.GetInterface("IFsGateway")!=null || type.GetInterface("IFsDb")!=null) {
 					modules.Add(type);
 				}
 			}
@@ -257,8 +254,8 @@ namespace FsGateway
 					return;
 				}
 				
-				fsGw=(IFsGateway)ci.Invoke(null);
-				if (fsGw.storageType.Equals(storageType)) {
+				fsModule=(IFsModule)ci.Invoke(null);
+				if (fsModule.storageType!=null && fsModule.storageType.Equals(storageType)) {
 					foundIt=true;
 					break;
 				}
@@ -271,9 +268,16 @@ namespace FsGateway
 				// Purge already used params
 				string[] arg=new string[args.Length-2];
 				Array.Copy(args,2,arg,0,arg.Length);
-				fsGw.Connect(args[1]);
-			
-				using (FuseWrapper fw = new FuseWrapper(fsGw,arg)) {
+				fsModule.Connect(args[1]);
+
+				IFsGateway gw=null;
+				if (fsModule.GetType().GetInterface("IFsGateway")!=null) {
+					gw = (IFsGateway) fsModule;
+				} else {
+					gw=new FsDbManager((IFsDb)fsModule);
+				}
+
+				using (FuseWrapper fw = new FuseWrapper(gw,arg)) {
 					fw.Start ();
 				}
 			}

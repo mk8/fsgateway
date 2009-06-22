@@ -6,18 +6,11 @@ using Mono.Fuse;
 namespace FsGateway
 {
 	
-	public interface IFsGateway:IDisposable
+	public interface IFsGateway:IFsModule
 	{
-		string Usage  { get; }
 		string connectionParameter {get ; }
-		string storageType {
-			get ;
-		}
 		
 		bool Connect();
-		bool Connect(string parameter);
-		void Unconnect();
-		bool isConnect { get; }
 		
 		Errno OnReadDirectory (string directory
 		                      ,OpenedPathInfo info

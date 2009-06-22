@@ -63,7 +63,7 @@ namespace FsGateway
 		}
 				
 		public override string ToString() {
-			return _schema+"."+_name;
+			return (_schema != null ? _schema + "." : "")+_name;
 		}
 	}
 }

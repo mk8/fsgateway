@@ -34,11 +34,22 @@ namespace FsGateway
 		    names.Add ("/sequences");
 			
 			this.connectionString=connectionString;
-			IFsDb pg=new Postgresql();
+			IFsDb pg=new Sqlite();
+//			IFsDb pg=new Postgresql();
+			
 			pg.Connect(connectionString);
 			this.db=pg;
 		}
 
+		public FsDbManager (IFsDb db) {
+			names.Add ("/tables");
+		    names.Add ("/views");
+		    names.Add ("/indexes");
+		    names.Add ("/sequences");
+			
+			this.db=db;
+		}
+		
 		public void Dispose() {
 			if (db!=null)
 				db.Unconnect();
@@ -49,7 +60,8 @@ namespace FsGateway
 		public bool Connect() {
 			if (db==null) {
 				if (connectionString!=null && connectionString.Length>0) {
-					IFsDb pg=new Postgresql();
+					IFsDb pg=new Sqlite();
+//					IFsDb pg=new Postgresql();
 					pg.Connect(connectionString);
 					this.db=pg;
 				}
@@ -78,7 +90,7 @@ namespace FsGateway
 				bool res=false;
 			
 				if (db!=null)
-					res=db.isConnected;
+					res=db.isConnect;
 				
 				return res;
 			}
@@ -86,13 +98,13 @@ namespace FsGateway
 		
 		public string storageType {
 			get {
-				return "postgres";
+				return null;
 			}
 		}
 
 		public string Usage {
 			get {
-				return "Specify the connection parameter like this one: \"Server=localhsot; Database=mydb; User ID=username;Password=password;Port=5432;";
+				return null;
 			}
 		}
 		
@@ -110,7 +122,6 @@ namespace FsGateway
 		public Errno OnReadDirectory (string directory, OpenedPathInfo info,
 		                                          out IEnumerable<DirectoryEntry> names)
 		{
-			System.Console.Out.WriteLine("DEBUG: OnReadDirectory on "+directory);
 			
 			// Check for root directory
 			if (directory.Equals("/")) {
@@ -136,16 +147,13 @@ namespace FsGateway
 
 		private IEnumerable<DirectoryEntry> ListNames (string directory)
 		{
-			System.Console.Out.WriteLine("DEBUG: ListName for "+directory);
 			foreach (string name in names) {
-				System.Console.Out.WriteLine("-name="+name);
 				yield return new DirectoryEntry (name.Substring (1));
 			}
 		}
 
 		private IEnumerable<DirectoryEntry> ListNames (SortedList<string,Index> list)
 		{
-			System.Console.Out.WriteLine("DEBUG: ListName for indexes");
 			foreach (Index name in list.Values) {
 				yield return new DirectoryEntry (name.ToString());
 			}
@@ -153,7 +161,6 @@ namespace FsGateway
 
 		private IEnumerable<DirectoryEntry> ListNames (SortedList<string,View> list)
 		{
-			System.Console.Out.WriteLine("DEBUG: ListName for views");
 			foreach (View name in list.Values) {
 				yield return new DirectoryEntry (name.ToString());
 			}
@@ -161,7 +168,6 @@ namespace FsGateway
 
 		private IEnumerable<DirectoryEntry> ListNames (SortedList<string,Sequence> list)
 		{
-			System.Console.Out.WriteLine("DEBUG: ListName for sequence");
 			foreach (Sequence name in list.Values) {
 				yield return new DirectoryEntry (name.ToString());
 			}
@@ -169,7 +175,6 @@ namespace FsGateway
 
 		private IEnumerable<DirectoryEntry> ListNames (SortedList<string,Table> list)
 		{
-			System.Console.Out.WriteLine("DEBUG: ListName for table");
 			foreach (Table name in list.Values) {
 				yield return new DirectoryEntry (name.ToString());
 			}
@@ -177,7 +182,6 @@ namespace FsGateway
 
 		public Errno OnGetPathStatus (string path, ref Stat stbuf)
 		{
-			System.Console.Out.WriteLine("DEBUG: OnGetPathStatus for "+path+" UID="+Mono.Unix.Native.Syscall.getuid()+" GID="+Mono.Unix.Native.Syscall.getgid());			
 
 			stbuf = new Stat ();
 
@@ -243,8 +247,8 @@ namespace FsGateway
 
 		
 		public Errno OnReadHandle (string file, OpenedPathInfo info, byte[] buf, long offset, [System.Runtime.InteropServices.Out] out int bytesWritten) {
+
 			// Check the type of file
-			System.Console.Out.WriteLine("DEBUG: OnReadHandle for "+file);			
 			bytesWritten=0;
 			
 			try {

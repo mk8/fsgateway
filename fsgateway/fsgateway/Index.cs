@@ -72,7 +72,7 @@ namespace FsGateway
 		
 		public Byte[] Buffer {
 			get {
-				if (_buffer==null) {
+				if (_buffer ==null) {
 					System.Text.UTF8Encoding encoder=new System.Text.UTF8Encoding();
 					_buffer=encoder.GetBytes(_script);
 				}
@@ -81,7 +81,7 @@ namespace FsGateway
 		}
 				
 		public override string ToString() {
-			return _schema+"."+_name;
+			return (_schema != null ? _schema+"." : "")+_name;
 		}
 	}
 }
