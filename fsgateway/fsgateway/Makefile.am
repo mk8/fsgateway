@@ -14,8 +14,8 @@ COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
 BUILD_DIR = ../bin
 
-MONO_FUSE_DLL_SOURCE=/usr/local/lib/mono-fuse/Mono.Fuse.dll
-MONO_FUSE_DLL_CONFIG_SOURCE=/usr/local/lib/mono-fuse/Mono.Fuse.dll.config
+MONO_FUSE_DLL_SOURCE=../../../../../../usr/lib/mono-fuse/Mono.Fuse.dll
+MONO_FUSE_DLL_CONFIG_SOURCE=../../../../../../usr/lib/mono-fuse/Mono.Fuse.dll.config
 
 endif
 
@@ -29,8 +29,8 @@ COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
 BUILD_DIR = bin/Release
 
-MONO_FUSE_DLL_SOURCE=/usr/local/lib/mono-fuse/Mono.Fuse.dll
-MONO_FUSE_DLL_CONFIG_SOURCE=/usr/local/lib/mono-fuse/Mono.Fuse.dll.config
+MONO_FUSE_DLL_SOURCE=../../../../../../usr/lib/mono-fuse/Mono.Fuse.dll
+MONO_FUSE_DLL_CONFIG_SOURCE=../../../../../../usr/lib/mono-fuse/Mono.Fuse.dll.config
 
 endif
 
@@ -50,23 +50,19 @@ all: $(ASSEMBLY) $(PROGRAMFILES) $(BINARIES)
 
 FILES =  \
 	AssemblyInfo.cs \
+	DirAsTag.cs \
+	Field.cs \
+	FsDbManager.cs \
 	FsGateway.cs \
 	FuseWrapper.cs \
+	IFsDb.cs \
 	IFsGateway.cs \
+	Index.cs \
+	Postgresql.cs \
+	Sequence.cs \
 	SugarDatastore.cs \
-	OlpcMetadata.cs \
-	FsXml.cs \
-	#
-
-#	Sequence.cs \
-#	DirAsTag.cs \
-#	IFsDb.cs \
-#	FsDbManager.cs \
-#	Postgresql.cs \
-#	Field.cs \
-#	Index.cs \
-#	Table.cs \
-#	View.cs 
+	Table.cs \
+	View.cs 
 
 DATA_FILES = 
 
@@ -77,14 +73,13 @@ EXTRAS = \
 
 REFERENCES =  \
 	Mono.Posix \
+	Npgsql \
 	System \
 	System.Data \
-	/usr/local/lib/mono-fuse/Mono.Fuse.dll
-
-#	Npgsql
+	usr/lib/mono-fuse/Mono.Fuse.dll
 
 DLL_REFERENCES =  \
-	/usr/local/lib/mono-fuse/Mono.Fuse.dll
+	../../../../../../usr/lib/mono-fuse/Mono.Fuse.dll
 
 CLEANFILES = $(PROGRAMFILES) $(BINARIES) 
 

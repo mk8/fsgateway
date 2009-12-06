@@ -30,6 +30,9 @@
     <File name="FsDbManager.cs" subtype="Code" buildaction="Compile" />
     <File name="SugarDatastore.cs" subtype="Code" buildaction="Compile" />
     <File name="OlpcMetadata.cs" subtype="Code" buildaction="Compile" />
+    <File name="FsXml.cs" subtype="Code" buildaction="Compile" />
+    <File name="FsSqlite.cs" subtype="Code" buildaction="Compile" />
+    <File name="IFsModule.cs" subtype="Code" buildaction="Compile" />
   </Contents>
   <References>
     <ProjectReference type="Gac" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
@@ -37,6 +40,8 @@
     <ProjectReference type="Gac" localcopy="True" refto="Npgsql, Version=2.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7" />
     <ProjectReference type="Gac" localcopy="True" refto="Mono.Posix, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
     <ProjectReference type="Assembly" localcopy="True" specificVersion="False" refto="../../mono_fuse/mono-fuse-0.4.2/lib/mono-fuse/Mono.Fuse.dll" />
+    <ProjectReference type="Gac" localcopy="True" refto="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <ProjectReference type="Gac" localcopy="True" refto="Mono.Data.Sqlite, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
   </References>
   <LanguageParameters StartupObject="FsGateway.FsGateway" ApplicationIcon="." ctype="CSharpProjectParameters" />
   <MonoDevelop.Autotools.MakefileInfo RelativeMakefileName="Makefile.am" SyncReferences="True">

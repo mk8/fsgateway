@@ -77,7 +77,7 @@ namespace FsGateway
 			return gw.OnReadDirectory(directory, info, out names);
 		}
 		
-		protected Errno OnGetPathStatus (string path
+		protected override Errno OnGetPathStatus (string path
 		                                         ,ref Stat stbuf) {
 			return gw.OnGetPathStatus (path, ref stbuf);
 		}
