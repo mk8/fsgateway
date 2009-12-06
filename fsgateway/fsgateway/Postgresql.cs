@@ -167,7 +167,7 @@ namespace FsGateway
 						+ "     , relkind "
 						+ "     , relowner as rolname "
 						+ "     , relchecks "
-						+ "     , reltriggers "
+//						+ "     , reltriggers "
 						+ "     , relhasindex "
 						+ "     , relhasrules "
 						+ "     , relhasoids "

@@ -231,7 +231,7 @@ namespace FsGateway
 			return 0;
 		}
 
-		public Errno OnGetPathStatus (string path, ref Stat stbuf)
+		public Errno OnGetPathStatus (string path, out Stat stbuf)
 		{
 
 			stbuf = new Stat ();

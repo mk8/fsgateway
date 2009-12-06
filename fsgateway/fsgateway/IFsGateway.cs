@@ -16,7 +16,7 @@ namespace FsGateway
 		                      ,OpenedPathInfo info
 		                      ,out IEnumerable<DirectoryEntry> names);
 		Errno OnGetPathStatus (string path
-		                      ,ref Stat stbuf);
+		                      ,out Stat stbuf);
 		Errno OnReadHandle (string file
 		                   ,OpenedPathInfo info
 		                   ,byte[] buf

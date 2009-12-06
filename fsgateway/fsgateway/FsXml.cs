@@ -194,7 +194,7 @@ namespace FsGateway
 		}
 		
 
-		public Errno OnGetPathStatus (string path, ref Stat stbuf)
+		public Errno OnGetPathStatus (string path, out Stat stbuf)
 		{
 			stbuf = new Stat ();
 			stbuf.st_uid = uid;

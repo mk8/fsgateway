@@ -26,27 +26,12 @@ namespace FsGateway
 		    names.Add ("/sequences");
 		}
 				
-		public FsDbManager (string connectionString, string[] args)
-		{
-			names.Add ("/tables");
-		    names.Add ("/views");
-		    names.Add ("/indexes");
-		    names.Add ("/sequences");
-			
-			this.connectionString=connectionString;
-			IFsDb pg=new Sqlite();
-//			IFsDb pg=new Postgresql();
-			
-			pg.Connect(connectionString);
-			this.db=pg;
-		}
-
 		public FsDbManager (IFsDb db) {
 			names.Add ("/tables");
 		    names.Add ("/views");
 		    names.Add ("/indexes");
 		    names.Add ("/sequences");
-			
+
 			this.db=db;
 		}
 		
@@ -60,8 +45,8 @@ namespace FsGateway
 		public bool Connect() {
 			if (db==null) {
 				if (connectionString!=null && connectionString.Length>0) {
-					IFsDb pg=new Sqlite();
-//					IFsDb pg=new Postgresql();
+//					IFsDb pg=new Sqlite();
+					IFsDb pg=new Postgresql();
 					pg.Connect(connectionString);
 					this.db=pg;
 				}
@@ -122,7 +107,6 @@ namespace FsGateway
 		public Errno OnReadDirectory (string directory, OpenedPathInfo info,
 		                                          out IEnumerable<DirectoryEntry> names)
 		{
-			
 			// Check for root directory
 			if (directory.Equals("/")) {
 				names = ListNames (directory);
@@ -180,7 +164,7 @@ namespace FsGateway
 			}
 		}
 
-		public Errno OnGetPathStatus (string path, ref Stat stbuf)
+		public Errno OnGetPathStatus (string path, out Stat stbuf)
 		{
 
 			stbuf = new Stat ();

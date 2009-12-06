@@ -268,7 +268,7 @@ namespace FsGateway
 			return 0;
 		}
 
-		public Errno OnGetPathStatus (string path, ref Stat stbuf)
+		public Errno OnGetPathStatus (string path, out Stat stbuf)
 		{
 //			System.Console.Out.Write("DEBUG: OnGetPathStatus for "+path+" UID="+Mono.Unix.Native.Syscall.getuid()+" GID="+Mono.Unix.Native.Syscall.getgid());			
 
