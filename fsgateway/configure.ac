@@ -1,47 +1,38 @@
-dnl Warning: This is an automatically generated file, do not edit!
-dnl Process this file with autoconf to produce a configure script.
-AC_PREREQ([2.54])
-AC_INIT([fsgateway], [0.1])
-AM_INIT_AUTOMAKE([foreign])
+AC_INIT(fsgateway/FsGateway.cs)
 
-dnl pkg-config
+AC_PREREQ([2.13])
+
+VERSION=0.0.3
+
+AM_INIT_AUTOMAKE(fsgateway, $VERSION)
+
+AM_MAINTAINER_MODE
+
+AC_PROG_INSTALL
+
 AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 if test "x$PKG_CONFIG" = "xno"; then
         AC_MSG_ERROR([You need to install pkg-config])
 fi
+AC_SUBST(PKH_CONFIG)
 
-dnl SHAMROCK_EXPAND_LIBDIR
-dnl SHAMROCK_EXPAND_BINDIR
-dnl SHAMROCK_EXPAND_DATADIR
+MONO_REQ_VERSION=2.0.1
+PKG_CHECK_MODULES(MONO, mono >= $MONO_REQ_VERSION)
 
-AC_PROG_INSTALL
+MONO_FUSE_REQ_VERSION=0.4
+PKG_CHECK_MODULES([MONO_FUSE], [mono-fuse] >= $MONO_FUSE_REQ_VERSION)
 
 AC_PATH_PROG(GMCS, gmcs, no)
 if test "x$GMCS" = "xno"; then
-        AC_MSG_ERROR([gmcs Not found])
+        AC_MSG_ERROR([You need to install gmcs])
 fi
+AC_SUBST(GMCS)
 
-
-AC_ARG_ENABLE(debug,
-	AC_HELP_STRING([--enable-debug],
-		[Use 'DEBUG' Configuration [default=YES]]),
-		enable_debug=yes, enable_debug=no)
-AM_CONDITIONAL(ENABLE_DEBUG, test x$enable_debug = xyes)
-if test "x$enable_debug" = "xyes" ; then
-	CONFIG_REQUESTED="yes"
+AC_PATH_PROG(GACUTIL, gacutil, no)
+if test "x$GACUTIL" = "xno"; then
+        AC_MSG_ERROR([You need to install gacutil])
 fi
-AC_ARG_ENABLE(release,
-	AC_HELP_STRING([--enable-release],
-		[Use 'RELEASE' Configuration [default=NO]]),
-		enable_release=yes, enable_release=no)
-AM_CONDITIONAL(ENABLE_RELEASE, test x$enable_release = xyes)
-if test "x$enable_release" = "xyes" ; then
-	CONFIG_REQUESTED="yes"
-fi
-if test -z "$CONFIG_REQUESTED" ; then
-	AM_CONDITIONAL(ENABLE_DEBUG, true)
-	enable_debug=yes
-fi
+AC_SUBST(GACUTIL)
 
 AC_CONFIG_FILES([
 fsgateway/Makefile
