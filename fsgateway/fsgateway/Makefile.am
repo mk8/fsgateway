@@ -42,7 +42,8 @@ FILES =  \
 	SugarDatastore.cs \
 	Table.cs \
 	View.cs \
-	FsMySql.cs
+	FsMySql.cs \
+	FsSqlServer.cs
 
 
 DATA_FILES = 

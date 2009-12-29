@@ -211,7 +211,7 @@ namespace FsGateway
 */		
 		public static void PrintUsage(List<Type> modules) {
 			IFsModule fsModule;
-			System.Console.Out.WriteLine("FsGateway version 0.0.1.");
+			System.Console.Out.WriteLine("FsGateway version 0.1.0.");
 			System.Console.Out.WriteLine("FsGateway usage\n");
 			System.Console.Out.WriteLine("\tmono fsgateway storagetype connection_string [fuse_option] mountpoint\n");
 			System.Console.Out.WriteLine("Where:");

@@ -1,0 +1,11 @@
+2009-12-27  Torello Querci  <torello@torosoft.com>
+
+		fsgateway/FsSqlServer.cs: Added the support of SqlServer
+		fsgateway/Makefile.am: Added the dependency of FsSqlServer.cs
+		fsgateway/FsGateway.cs: Change version number from 0.0.1 to 0.1.0
+
+2009-12-07  Torello Querci  <torello@torosoft.com>
+
+	        * configure.in: File added to be able to compile fsgateway
+
+	
