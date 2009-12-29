@@ -116,60 +116,63 @@ namespace FsGateway
 				tableList=new SortedList<string,Table>();
 
 				IDbCommand dbcmd = dbcon.CreateCommand();
-				sql = "select name, user_name(uid) from sysobjects where type='U'"
-				      ;
-				
-				try {
-					dbcmd.CommandText = sql;
-					reader = dbcmd.ExecuteReader();
-					while(reader.Read()) {
-						Table table=new Table(null,reader.GetString(0));
-						tableList.Add(table.ToString(), table);
-					}
-				} catch (Exception ex) {
-					Console.WriteLine("Exception reading of the tables list : "+ex.Message);
-					Console.WriteLine("List tables: SQL=" + sql);
-				}
-				reader.Close();				
 
-				// ReRead data for fetching detail
-				foreach (Table table in tableList.Values) {
-					   
-					sql = "SELECT COLUMN_NAME, data_type, CHARACTER_MAXIMUM_LENGTH "
-						+ "FROM INFORMATION_SCHEMA.COLUMNS "
-						+ "WHERE TABLE_NAME = '"+table.Name+"'";
-					string listFilesStr="";
+				lock (dbcmd) {
+					sql = "select name, user_name(uid) from sysobjects where type='U'"
+					      ;
+					
 					try {
 						dbcmd.CommandText = sql;
 						reader = dbcmd.ExecuteReader();
-						listFilesStr="";
-						while (reader.Read()) {
-							Field field;
-							if (reader.IsDBNull(reader.GetOrdinal("CHARACTER_MAXIMUM_LENGTH"))) {
-								field=new Field(reader.GetString(reader.GetOrdinal("Column_name")),reader.GetString(reader.GetOrdinal("data_type")));
-							} else {
-								field=new Field(reader.GetString(reader.GetOrdinal("Column_name")),reader.GetString(reader.GetOrdinal("data_type"))+"("+reader.GetInt32(reader.GetOrdinal("CHARACTER_MAXIMUM_LENGTH"))+")");	
+						while(reader.Read()) {
+							Table table=new Table(null,reader.GetString(0));
+							tableList.Add(table.ToString(), table);
+						}
+					} catch (Exception ex) {
+						Console.WriteLine("Exception reading of the tables list : "+ex.Message);
+						Console.WriteLine("List tables: SQL=" + sql);
+					}
+					reader.Close();				
+	
+					// ReRead data for fetching detail
+					foreach (Table table in tableList.Values) {
+						   
+						sql = "SELECT COLUMN_NAME, data_type, CHARACTER_MAXIMUM_LENGTH "
+							+ "FROM INFORMATION_SCHEMA.COLUMNS "
+							+ "WHERE TABLE_NAME = '"+table.Name+"'";
+						string listFilesStr="";
+						try {
+							dbcmd.CommandText = sql;
+							reader = dbcmd.ExecuteReader();
+							listFilesStr="";
+							while (reader.Read()) {
+								Field field;
+								if (reader.IsDBNull(reader.GetOrdinal("CHARACTER_MAXIMUM_LENGTH"))) {
+									field=new Field(reader.GetString(reader.GetOrdinal("Column_name")),reader.GetString(reader.GetOrdinal("data_type")));
+								} else {
+									field=new Field(reader.GetString(reader.GetOrdinal("Column_name")),reader.GetString(reader.GetOrdinal("data_type"))+"("+reader.GetInt32(reader.GetOrdinal("CHARACTER_MAXIMUM_LENGTH"))+")");	
+								}
+								table.Fields.Add(field.Name,field);
 							}
-							table.Fields.Add(field.Name,field);
+		
+							reader.Close();
+	
+							table.Script = "CREATE TABLE "+table.ToString()+"\n"
+								+ "(\t";
+							string separator="";
+							foreach (Field field in table.Fields.Values) {
+								table.Script += separator+field.Name+"\t"+field.Type;
+								separator=",\n\t";
+							}
+							table.Script += "\n);\n";
+							
+						} catch (Exception ex) {
+							Console.WriteLine("Exception reading the tables fields detail for table: " + table.ToString()+ " message : "+ex.Message);
+							Console.WriteLine("SQL used: "+sql);
+							Console.WriteLine(ex.StackTrace);
 						}
 	
-						reader.Close();
-
-						table.Script = "CREATE TABLE "+table.ToString()+"\n"
-							+ "(\t";
-						string separator="";
-						foreach (Field field in table.Fields.Values) {
-							table.Script += separator+field.Name+"\t"+field.Type;
-							separator=",\n\t";
-						}
-						table.Script += "\n);\n";
-						
-					} catch (Exception ex) {
-						Console.WriteLine("Exception reading the tables fields detail for table: " + table.ToString()+ " message : "+ex.Message);
-						Console.WriteLine("SQL used: "+sql);
-						Console.WriteLine(ex.StackTrace);
 					}
-
 				}
 				
 				// clean up
@@ -196,62 +199,64 @@ namespace FsGateway
 				viewList=new SortedList<string,View>();
 
 				IDbCommand dbcmd = dbcon.CreateCommand();
-				sql = "select name, user_name(uid) from sysobjects where type='V'"
-				      ;
-				
-				try {
-					dbcmd.CommandText = sql;
-					reader = dbcmd.ExecuteReader();
-					while(reader.Read()) {
-						view=new View(null,reader.GetString(0),null);
-						viewList.Add(view.ToString(), view);
-					}
-				} catch (Exception ex) {
-					Console.WriteLine("Exception reading of the view list : "+ex.Message);
-					Console.WriteLine("List views: SQL=" + sql);
-				}
-				reader.Close();				
-				
-				// ReRead data for fetching detail
-				foreach (View viewDetail in viewList.Values) {
-					   
-					sql = "SELECT COLUMN_NAME, data_type, CHARACTER_MAXIMUM_LENGTH "
-						+ "FROM INFORMATION_SCHEMA.COLUMNS "
-						+ "WHERE TABLE_NAME = '"+viewDetail.Name+"'";
-					SortedList<string,Field> listFields=new SortedList<string,Field>();
-					string listFilesStr="";
+				lock (dbcmd) {
+					sql = "select name, user_name(uid) from sysobjects where type='V'"
+					      ;
+					
 					try {
 						dbcmd.CommandText = sql;
 						reader = dbcmd.ExecuteReader();
-						listFilesStr="";
-						while (reader.Read()) {
-							Field field;
-							if (reader.IsDBNull(reader.GetOrdinal("CHARACTER_MAXIMUM_LENGTH"))) {
-								field=new Field(reader.GetString(reader.GetOrdinal("Column_name")),reader.GetString(reader.GetOrdinal("data_type")));
-							} else {
-								field=new Field(reader.GetString(reader.GetOrdinal("Column_name")),reader.GetString(reader.GetOrdinal("data_type"))+"("+reader.GetInt32(reader.GetOrdinal("CHARACTER_MAXIMUM_LENGTH"))+")");	
+						while(reader.Read()) {
+							view=new View(null,reader.GetString(0),null);
+							viewList.Add(view.ToString(), view);
+						}
+					} catch (Exception ex) {
+						Console.WriteLine("Exception reading of the view list : "+ex.Message);
+						Console.WriteLine("List views: SQL=" + sql);
+					}
+					reader.Close();				
+					
+					// ReRead data for fetching detail
+					foreach (View viewDetail in viewList.Values) {
+						   
+						sql = "SELECT COLUMN_NAME, data_type, CHARACTER_MAXIMUM_LENGTH "
+							+ "FROM INFORMATION_SCHEMA.COLUMNS "
+							+ "WHERE TABLE_NAME = '"+viewDetail.Name+"'";
+						SortedList<string,Field> listFields=new SortedList<string,Field>();
+						string listFilesStr="";
+						try {
+							dbcmd.CommandText = sql;
+							reader = dbcmd.ExecuteReader();
+							listFilesStr="";
+							while (reader.Read()) {
+								Field field;
+								if (reader.IsDBNull(reader.GetOrdinal("CHARACTER_MAXIMUM_LENGTH"))) {
+									field=new Field(reader.GetString(reader.GetOrdinal("Column_name")),reader.GetString(reader.GetOrdinal("data_type")));
+								} else {
+									field=new Field(reader.GetString(reader.GetOrdinal("Column_name")),reader.GetString(reader.GetOrdinal("data_type"))+"("+reader.GetInt32(reader.GetOrdinal("CHARACTER_MAXIMUM_LENGTH"))+")");	
+								}
+								listFields.Add(field.Name,field);
 							}
-							listFields.Add(field.Name,field);
+		
+							reader.Close();
+							reader = null;
+	
+							viewDetail.Script = "CREATE VIEW "+viewDetail.ToString()+"\n"
+								+ "(\t";
+							string separator="";
+							foreach (Field field in listFields.Values) {
+								viewDetail.Script += separator+field.Name+"\t"+field.Type;
+								separator=",\n\t";
+							}
+							viewDetail.Script += "\n);\n";
+							
+						} catch (Exception ex) {
+							Console.WriteLine("Exception reading the views fields detail for table: " + viewDetail.ToString()+ " message : "+ex.Message);
+							Console.WriteLine("SQL used: "+sql);
+							Console.WriteLine(ex.StackTrace);
 						}
 	
-						reader.Close();
-						reader = null;
-
-						viewDetail.Script = "CREATE VIEW "+viewDetail.ToString()+"\n"
-							+ "(\t";
-						string separator="";
-						foreach (Field field in listFields.Values) {
-							viewDetail.Script += separator+field.Name+"\t"+field.Type;
-							separator=",\n\t";
-						}
-						viewDetail.Script += "\n);\n";
-						
-					} catch (Exception ex) {
-						Console.WriteLine("Exception reading the views fields detail for table: " + viewDetail.ToString()+ " message : "+ex.Message);
-						Console.WriteLine("SQL used: "+sql);
-						Console.WriteLine(ex.StackTrace);
 					}
-
 				}
 
 				// clean up
@@ -278,38 +283,40 @@ namespace FsGateway
 				indexList=new SortedList<string,Index>();
 
 				IDbCommand dbcmd = dbcon.CreateCommand();
-				sql = "select name, user_name(uid) from sysobjects where type='U'"
-				      ;
-				try {
-					dbcmd.CommandText = sql;
-					reader = dbcmd.ExecuteReader();
-					while(reader.Read()) {
-						listTables.Add(reader.GetString(0));
+				lock (dbcmd) {
+					sql = "select name, user_name(uid) from sysobjects where type='U'"
+					      ;
+					try {
+						dbcmd.CommandText = sql;
+						reader = dbcmd.ExecuteReader();
+						while(reader.Read()) {
+							listTables.Add(reader.GetString(0));
+						}
+					} catch (Exception ex) {
+						Console.WriteLine("Exception reading of the tables list for the indexes : "+ex.Message);
+						Console.WriteLine("List tables: SQL=" + sql);
 					}
-				} catch (Exception ex) {
-					Console.WriteLine("Exception reading of the tables list for the indexes : "+ex.Message);
-					Console.WriteLine("List tables: SQL=" + sql);
-				}
-				reader.Close();				
-
-				foreach (string tableName in listTables) {
-					sql="exec sp_helpindex "+tableName;
-					dbcmd.CommandText=sql;
-					reader = dbcmd.ExecuteReader();
-					while (reader.Read()) {
-						index=new Index(tableName,
-						                reader.GetString(reader.GetOrdinal("index_name")),
-						                reader.GetString(reader.GetOrdinal("index_name")),
-						                "CREATE INDEX "+reader.GetString(reader.GetOrdinal("index_name"))
-						               +" ON "+tableName
-						               +" ("+reader.GetString(reader.GetOrdinal("index_keys"))+")"
-						               +";\n");
-						indexList.Add(index.ToString(),index);
+					reader.Close();				
+	
+					foreach (string tableName in listTables) {
+						sql="exec sp_helpindex "+tableName;
+						dbcmd.CommandText=sql;
+						reader = dbcmd.ExecuteReader();
+						while (reader.Read()) {
+							index=new Index(tableName,
+							                reader.GetString(reader.GetOrdinal("index_name")),
+							                reader.GetString(reader.GetOrdinal("index_name")),
+							                "CREATE INDEX "+reader.GetString(reader.GetOrdinal("index_name"))
+							               +" ON "+tableName
+							               +" ("+reader.GetString(reader.GetOrdinal("index_keys"))+")"
+							               +";\n");
+							indexList.Add(index.ToString(),index);
+						}
+						
+						// clean up
+						reader.Close();
+						reader = null;
 					}
-					
-					// clean up
-					reader.Close();
-					reader = null;
 				}
 
 				dbcmd.Dispose();
