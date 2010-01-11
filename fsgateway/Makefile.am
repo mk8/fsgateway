@@ -1,4 +1,4 @@
-SUBDIRS =  fsgateway
+SUBDIRS =  src
 
 MAINTAINERCLEANFILES = \
         INSTALL \

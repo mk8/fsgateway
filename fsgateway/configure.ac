@@ -1,4 +1,4 @@
-AC_INIT(fsgateway/FsGateway.cs)
+AC_INIT(src/FsGateway.cs)
 
 AC_PREREQ([2.13])
 
@@ -41,7 +41,7 @@ INSTALLED_ASSEMBLIES="`$PKG_CONFIG --variable=Libraries $UNSTABLE_INSTALL_ASSEMB
 AC_SUBST(INSTALLED_ASSEMBLIES)
 
 AC_CONFIG_FILES([
-fsgateway/Makefile
+src/Makefile
 Makefile
 ])
 
