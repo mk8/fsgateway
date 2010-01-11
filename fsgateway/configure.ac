@@ -34,6 +34,12 @@ if test "x$GACUTIL" = "xno"; then
 fi
 AC_SUBST(GACUTIL)
 
+dnl find assembly paths for unstable installed assemblies that will be
+dnl copied into monoskel installation directory for local usage with the app
+UNSTABLE_INSTALL_ASSEMBLIES="mono-fuse"
+INSTALLED_ASSEMBLIES="`$PKG_CONFIG --variable=Libraries $UNSTABLE_INSTALL_ASSEMBLIES`"
+AC_SUBST(INSTALLED_ASSEMBLIES)
+
 AC_CONFIG_FILES([
 fsgateway/Makefile
 Makefile

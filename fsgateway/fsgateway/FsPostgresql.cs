@@ -28,20 +28,21 @@ namespace FsGateway
 {
 	
 	
-	public class Postgresql : IFsDb
+	public class FsPostgresql : IFsDb
 	{
+		
 		private IDbConnection dbcon=null;
 		private string connectionString=null;
 		private bool _isConnected=false;
 		private int version_number_release=0; // e.s. 8.x.x
 		private int version_number_major=0; // e.s. x.3.0
 		private int version_number_minor=0; // e.s. x.x.0
-		
-		public Postgresql()
+
+		public FsPostgresql()
 		{
 		}
 
-		public Postgresql(string host, string database, string user, string password, string port)
+		public FsPostgresql(string host, string database, string user, string password, string port)
 		{
 
 			string connectionString = "Server="+host+";" +
@@ -70,7 +71,7 @@ namespace FsGateway
 		
 		public string storageType {
 			get {
-				return "postgresql";
+				return "PostgreSQL";
 			}
 		}
 
@@ -182,6 +183,7 @@ namespace FsGateway
 			SortedList<string,Table> tableList=null;
 			string sql;
 			IDataReader reader=null;
+			IDbDataParameter parameter=null;
 			
 			// Check for DB Connection
 			if (dbcon!=null) {
@@ -189,164 +191,17 @@ namespace FsGateway
 				tableList=new SortedList<string,Table>();
 
 				IDbCommand dbcmd = dbcon.CreateCommand();
-				if (version_number_release == 8 && version_number_major >= 2) {
-					sql = "SELECT c.tableoid "
-						+ "     , c.oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , relkind "
-						+ "     , relowner as rolname "
-						+ "     , relchecks "
-//						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , relhasoids "
-						+ "     , d.refobjid as owning_tab "
-						+ "     , d.refobjsubid as owning_col "
-						+ "     , t.spcname as reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , array_to_string(c.reloptions, ', ') as reloptions "
-						+ "from pg_class c "
-						+ "left join pg_depend d on (c.relkind = 'S' and d.classid = c.tableoid and d.objid = c.oid and d.objsubid = 0 and d.refclassid = c.tableoid and d.deptype = 'a') "
-						+ "left join pg_tablespace t on t.oid = c.reltablespace "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-					//	+ "  AND pg_catalog.pg_table_is_visible(c.oid) "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by n.nspname, relname";
-				} else if (version_number_release == 8) {
-					sql = "SELECT c.tableoid "
-						+ "     , c.oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , relkind "
-						+ "     , relnamespace "
-						+ "     , relowner as rolname "
-						+ "     , relchecks "
-						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , relhasoids "
-						+ "     , d.refobjid as owning_tab "
-						+ "     , d.refobjsubid as owning_col "
-						+ "     , (SELECT spcname FROM pg_tablespace t WHERE t.oid = c.reltablespace) AS reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , NULL as reloptions  "
-						+ "from pg_class c "
-						+ "left join pg_depend d "
-						+ "  on (c.relkind = 'S' and d.classid = c.tableoid and d.objid = c.oid and d.objsubid = 0 and d.refclassid = c.tableoid and d.deptype = 'i') "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by c.oid "
-						;
-				} else if (version_number_release == 7 && version_number_major >= 3) {
-					sql = "SELECT c.tableoid "
-						+ "     , c.oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , relkind "
-						+ "     , relnamespace "
-						+ "     , relowner as rolname "
-						+ "     , relchecks "
-						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , relhasoids "
-						+ "     , d.refobjid as owning_tab "
-						+ "     , d.refobjsubid as owning_col "
-						+ "     , NULL AS reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , NULL as reloptions  "
-						+ "from pg_class c "
-						+ "left join pg_depend d "
-						+ "  on (c.relkind = 'S' and d.classid = c.tableoid and d.objid = c.oid and d.objsubid = 0 and d.refclassid = c.tableoid and d.deptype = 'i') "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by c.oid "
-						;
-				} else if (version_number_release == 7 && version_number_major >= 2) {
-					sql = "SELECT c.tableoid "
-						+ "     , c.oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , relkind "
-						+ "     , relnamespace "
-						+ "     , relowner as rolname "
-						+ "     , relchecks "
-						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , relhasoids "
-						+ "     , NULL::oid as owning_tab "
-						+ "     , NULL::int4 as owning_col "
-						+ "     , NULL AS reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , NULL as reloptions  "
-						+ "from pg_class c "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by c.oid "
-						;
-				} else if (version_number_release == 7 && version_number_major >= 1) {
-					sql = "SELECT c.tableoid "
-						+ "     , c.oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , relkind "
-						+ "     , 0::oid as relnamespace "
-						+ "     , relowner as rolname "
-						+ "     , relchecks "
-						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , relhasoids "
-						+ "     , NULL::oid as owning_tab "
-						+ "     , NULL::int4 as owning_col "
-						+ "     , NULL AS reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , NULL as reloptions  "
-						+ "from pg_class c "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by c.oid "
-						;
-				} else {
-					sql = "SELECT (SELECT oid FROM pg_class WHERE relname = 'pg_class') AS tableoid "
-						+ "     , oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , CASE WHEN relhasrules and relkind = 'r' and EXISTS(SELECT rulename FROM pg_rewrite r WHERE r.ev_class = c.oid AND r.ev_type = '1') "
-						+ "                 THEN '%c'::\"char\" "
-						+ "                 ELSE relkind END AS relkind "
-						+ "     , 0::oid as relnamespace "
-						+ "     , (relowner) as rolname "
-						+ "     , relchecks "
-						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , 't'::bool as relhasoids "
-						+ "     , NULL::oid as owning_tab "
-						+ "     , NULL::int4 as owning_col "
-						+ "     , NULL as reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , NULL as reloptions "
-						+ "from pg_class c "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by oid"
-						;
-				}
-				
+				sql = "SELECT * "
+					+ "FROM information_schema.tables "
+					+ "where table_schema not in ('pg_catalog', 'information_schema') "
+					+ "  AND table_type='BASE TABLE' "
+					+ "ORDER BY table_schema, table_name "
+					;				
 				try {
 					dbcmd.CommandText = sql;
 					reader = dbcmd.ExecuteReader();
 					while(reader.Read()) {
-						Table table=new Table(reader.GetInt64(reader.GetOrdinal("oid")),reader.GetString(reader.GetOrdinal("namespace")),reader.GetString(reader.GetOrdinal("relname")));
+						Table table=new Table(reader.GetString(reader.GetOrdinal("table_schema")),reader.GetString(reader.GetOrdinal("table_name")));
 						tableList.Add(table.ToString(), table);
 					}
 				} catch (Exception ex) {
@@ -359,35 +214,41 @@ namespace FsGateway
 				// ReRead data for fetching detail
 				foreach (Table table in tableList.Values) {
 					   
-					sql = "SELECT a.attnum "
-						+ "     , a.attrelid "
-						+ "     , a.attname "
-						+ "     , a.atttypmod "
-						+ "     , a.attstattarget "
-						+ "     , a.attstorage "
-						+ "     , t.typstorage "
-						+ "     , a.attnotnull "
-						+ "     , a.atthasdef "
-						+ "     , a.attisdropped "
-						+ "     , a.attislocal "
-						+ "     , pg_catalog.format_type(t.oid,a.atttypmod) as atttypname "
-						+ "from pg_catalog.pg_attribute a "
-						+ "left join pg_catalog.pg_type t on a.atttypid = t.oid "
-						+ "where a.attnum > 0::pg_catalog.int2 "
-						+ "  and a.attrelid = "+table.Id+ " "
-						+ "order by a.attnum ";
+					sql = "SELECT * "
+						+ "FROM information_schema.columns "
+						+ "WHERE table_schema = :table_schema " // table.Schema
+						+ "  AND table_name = :table_name " // table.Name
+						+ "ORDER BY ordinal_position "
+						;
 					string listFilesStr="";
 					try {
 						dbcmd.CommandText = sql;
+
+						parameter = dbcmd.CreateParameter();
+						parameter.ParameterName="table_schema";
+						parameter.DbType = DbType.String;
+						parameter.Direction = ParameterDirection.Input;
+						parameter.Value=table.Schema;
+						dbcmd.Parameters.Add(parameter);
+						
+						parameter = dbcmd.CreateParameter();
+						parameter.ParameterName="table_name";
+						parameter.DbType = DbType.String;
+						parameter.Direction = ParameterDirection.Input;
+						parameter.Value=table.Name;
+						dbcmd.Parameters.Add(parameter);
+						
 						reader = dbcmd.ExecuteReader();
 						listFilesStr="";
 						while (reader.Read()) {
-							if (!reader.IsDBNull(reader.GetOrdinal("atttypname"))) {
-								listFilesStr += "Row number: "+reader.GetValue(0).ToString()+"\n";
-								listFilesStr += "Row name: "+reader.GetValue(reader.GetOrdinal("attname")).ToString();
-								Field field=new Field(reader.GetString(reader.GetOrdinal("attname")),reader.GetString(reader.GetOrdinal("atttypname")));	
-								table.Fields.Add(field.Name,field);
+							Field field=null;
+							
+							if (reader.IsDBNull(reader.GetOrdinal("character_maximum_length"))) {
+								field=new Field(reader.GetString(reader.GetOrdinal("column_name")),reader.GetString(reader.GetOrdinal("data_type")));	
+							} else {
+								field=new Field(reader.GetString(reader.GetOrdinal("column_name")),reader.GetString(reader.GetOrdinal("data_type"))+" ("+reader.GetInt32(reader.GetOrdinal("character_maximum_length"))+")");	
 							}
+							table.Fields.Add(field.Name,field);
 						}
 	
 						reader.Close();
@@ -405,6 +266,7 @@ namespace FsGateway
 						Console.WriteLine("Exception reading the tables fields detail for table: " + table.ToString()+ " message : "+ex.Message);
 						Console.WriteLine("SQL used: "+sql);
 						Console.WriteLine("FIELDS: "+listFilesStr);
+						Console.WriteLine("StackTrace: "+ex.StackTrace);
 					}
 
 				}
@@ -430,17 +292,17 @@ namespace FsGateway
 				viewList=new SortedList<string,View>();
 
 				IDbCommand dbcmd = dbcon.CreateCommand();
-				string sql = "SELECT * "
-						   + "FROM pg_catalog.pg_views "
-						   + "WHERE schemaname!='pg_catalog' "
-						   + "  AND schemaname!='information_schema' "
-						   + "ORDER BY schemaname, viewname ";
+				string sql = "select * "
+						   + "from information_schema.views "
+						   + "where table_schema not in ('pg_catalog', 'information_schema') "
+						   + "ORDER BY table_schema, table_name "
+						   ;
 				dbcmd.CommandText = sql;
 				IDataReader reader = dbcmd.ExecuteReader();
 				while(reader.Read()) {
-					view=new View(reader.GetString(reader.GetOrdinal("schemaname")),
-					              reader.GetString(reader.GetOrdinal("viewname")),
-					              reader.GetString(reader.GetOrdinal("definition"))+"\n");					                
+					view=new View(reader.GetString(reader.GetOrdinal("table_schema")),
+					              reader.GetString(reader.GetOrdinal("table_name")),
+					              reader.GetString(reader.GetOrdinal("view_definition"))+"\n");					                
 					viewList.Add(view.ToString(),view);
 				}
 				
@@ -499,20 +361,14 @@ namespace FsGateway
 				sequencesList=new SortedList<string,Sequence>();
 
 				IDbCommand dbcmd = dbcon.CreateCommand();
-				string sql = "SELECT n.nspname as SCHEMA "
-					       + "     , c.relname as NAME "
-						   + "     , u.usename as OWNER "
-						   + "FROM pg_catalog.pg_class c "
-						   + "LEFT JOIN pg_catalog.pg_user u ON u.usesysid = c.relowner "
-						   + "LEFT JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
-						   + "WHERE c.relkind='S' "
-						   + "  AND n.nspname NOT IN ('pg_catalog', 'pg_toast') "
-						   + "  AND pg_catalog.pg_table_is_visible(c.oid) "
-						   + "ORDER BY 1,2";
+				string sql = "SELECT * "
+					       + "FROM INFORMATION_SCHEMA.SEQUENCES "
+						   + "ORDER BY sequence_schema, sequence_name "
+						   ;
 				dbcmd.CommandText = sql;
 				IDataReader reader = dbcmd.ExecuteReader();
 				while(reader.Read()) {
-					Sequence sequence=new Sequence(reader.GetString(reader.GetOrdinal("SCHEMA")),reader.GetString(reader.GetOrdinal("NAME")));					
+					Sequence sequence=new Sequence(reader.GetString(reader.GetOrdinal("sequence_schema")),reader.GetString(reader.GetOrdinal("sequence_name")));					
 					sequencesList.Add(sequence.ToString(),sequence);
 					
 				}
