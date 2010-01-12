@@ -11,10 +11,10 @@ if test "x$PKG_CONFIG" = "xno"; then
 	AC_MSG_ERROR([You need to install pkg-config])
 fi
 
-dnl C# compiler
-AC_PATH_PROGS(CSC, [csc mono-csc], no)
-AC_PATH_PROGS(MCS, [mcs gmcs], no)
-AC_PATH_PROG(MONO, mono, no)
+dnl --- Check for mono and gmcs
+
+AC_PATH_PROG(MONO, mono)
+AC_PATH_PROG(MCS, gmcs)
 
 CS="C#"
 if test "x$CSC" = "xno" -a "x$MCS" = "xno"  ; then
