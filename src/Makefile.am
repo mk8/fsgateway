@@ -1,32 +1,10 @@
+fsgatewaydir=$(pkglibdir)
+fsgateway_SCRIPTS = fsgateway.exe
+EXTRA_DIST = $(fsgateway_sources)
+CLEANFILES = fsgateway.exe fsgateway.exe.mdb
+MAINTAINERCLEANFILES = Makefile.in
 
-ASSEMBLY_COMPILER_COMMAND = gmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ -debug "-define:DEBUG"
- "-main:FsGateway.FsGateway"
-
-ASSEMBLY_DIR = ../bin
-ASSEMBLY = $(ASSEMBLY_DIR)/fsgateway.exe
-ASSEMBLY_MDB = $(ASSEMBLY).mdb
-COMPILE_TARGET = exe
-PROJECT_REFERENCES = 
-BUILD_DIR = ../bin
-
-BINARIES = \
-	$(FSGATEWAY) 
-
-LIBFLAGS = \
-	-r:System \
-	-r:System.Data \
-	-r:Npgsql \
-	-r:Mono.Posix \
-	-r:System.Xml \
-	-pkg:mysql-connector-net \
-	-pkg:mono-fuse
-
-
-all: $(BINARIES) 
-
-FILES =  \
-	AssemblyInfo.cs \
+fsgateway_sources = AssemblyInfo.cs \
 	DirAsTag.cs \
 	Field.cs \
 	FsDbManager.cs \
@@ -47,28 +25,19 @@ FILES =  \
 	FsSqlServer.cs \
 	FsPostgresql.cs
 
-DATA_FILES = 
+fsgateway_libs = \
+	-r:System \
+	-r:System.Data \
+	-r:Npgsql \
+	-r:Mono.Posix \
+	-r:System.Xml \
+	$(MYSQL_CONNECTOR_NET_LIBS) \
+	$(MONO_FUSE_LIBS)
 
-RESOURCES = 
+fsgateway_flags = -noconfig -codepage:utf8 -warn:4 -optimize+ -debug "-define:DEBUG" "-main:FsGateway.FsGateway"
 
-EXTRAS = \
-	fsgateway.in 
-
-
-CLEANFILES = $(PROGRAMFILES) $(BINARIES) 
-
-FSGATEWAY = $(ASSEMBLY)
-
-MAIN = FsGateway.FsGateway
-
-$(eval $(call emit-deploy-wrapper,FSGATEWAY,fsgateway,x))
-
-$(ASSEMBLY) $(ASSEMBLY_MDB): $(PROJECT_REFERENCES) $(FILES)
-	mkdir -p $(dir $(ASSEMBLY))
-	$(ASSEMBLY_COMPILER_COMMAND) $(ASSEMBLY_COMPILER_FLAGS) -out:$(ASSEMBLY) -target:$(COMPILE_TARGET) -main:$(MAIN) $(LIBFLAGS) $(FILES)
-	for ASM in $(INSTALLED_ASSEMBLIES); do \
-		$(INSTALL) -c -m 0755 $$ASM $(ASSEMBLY_DIR); \
-	done;
+fsgateway.exe: $(fsgateway_sources)
+	$(MCS) $(fsgateway_flags) $(fsgateway_libs) -out:$@ $(fsgateway_sources)
 
 
 # Install Unstable Mono Libraries (see configure.ac)
@@ -82,3 +51,4 @@ uninstall-hook:
 	for ASM in $(INSTALLED_ASSEMBLIES); do \
 		rm -f $(DESTDIR)$(pkglibdir)/`basename $$ASM`; \
 	done;
+

@@ -1,7 +1,7 @@
 #! /bin/sh
 
 PROJECT=fsgateway
-FILE=
+FILE=src/FsGateway.cs
 CONFIGURE=configure.ac
 
 : ${AUTOCONF=autoconf}
@@ -51,10 +51,10 @@ if test "$DIE" -eq 1; then
         exit 1
 fi
                                                                                 
-#test $TEST_TYPE $FILE || {
-#        echo "You must run this script in the top-level $PROJECT directory"
-#        exit 1
-#}
+test $TEST_TYPE $FILE || {
+        echo "You must run this script in the top-level $PROJECT directory"
+        exit 1
+}
 
 if test -z "$*"; then
         echo "I am going to run ./configure with no arguments - if you wish "
@@ -81,3 +81,4 @@ $AUTOCONF
 
 echo Running $srcdir/configure $conf_flags "$@" ...
 $srcdir/configure --enable-maintainer-mode $conf_flags "$@" \
+

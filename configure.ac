@@ -1,38 +1,44 @@
 AC_INIT(src/FsGateway.cs)
-
-AC_PREREQ([2.13])
-
-VERSION=0.0.3
-
-AM_INIT_AUTOMAKE(fsgateway, $VERSION)
-
+AC_CANONICAL_SYSTEM
+AM_INIT_AUTOMAKE(fsgateway, 0.0.3)
 AM_MAINTAINER_MODE
 
 AC_PROG_INSTALL
 
+dnl pkg-config
 AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
 if test "x$PKG_CONFIG" = "xno"; then
-        AC_MSG_ERROR([You need to install pkg-config])
+	AC_MSG_ERROR([You need to install pkg-config])
 fi
-AC_SUBST(PKH_CONFIG)
 
-MONO_REQ_VERSION=2.0.1
-PKG_CHECK_MODULES(MONO, mono >= $MONO_REQ_VERSION)
+dnl C# compiler
+AC_PATH_PROGS(CSC, [csc mono-csc], no)
+AC_PATH_PROGS(MCS, [mcs gmcs], no)
+AC_PATH_PROG(MONO, mono, no)
 
-MONO_FUSE_REQ_VERSION=0.4
-PKG_CHECK_MODULES([MONO_FUSE], [mono-fuse] >= $MONO_FUSE_REQ_VERSION)
-
-AC_PATH_PROG(GMCS, gmcs, no)
-if test "x$GMCS" = "xno"; then
-        AC_MSG_ERROR([You need to install gmcs])
+CS="C#"
+if test "x$CSC" = "xno" -a "x$MCS" = "xno"  ; then
+	dnl AC_MSG_ERROR([You need to install a C# compiler])
+	AC_MSG_ERROR([No $CS compiler found])
 fi
-AC_SUBST(GMCS)
 
-AC_PATH_PROG(GACUTIL, gacutil, no)
-if test "x$GACUTIL" = "xno"; then
-        AC_MSG_ERROR([You need to install gacutil])
+if test "x$MCS" = "xno" ; then
+	MCS=$CSC
 fi
-AC_SUBST(GACUTIL)
+
+if test "x$MONO" = "xno"; then
+	AC_MSG_ERROR([No mono runtime found])
+else
+        PKG_CHECK_MODULES(MONO, mono >= 2.0.1)
+fi
+
+AC_SUBST(MCS)
+
+dnl mono-fuse
+PKG_CHECK_MODULES(MONO_FUSE, mono-fuse >= 0.4)
+
+dnl mysql-connector-net
+PKG_CHECK_MODULES(MYSQL_CONNECTOR_NET, mysql-connector-net)
 
 dnl find assembly paths for unstable installed assemblies that will be
 dnl copied into monoskel installation directory for local usage with the app
@@ -40,9 +46,15 @@ UNSTABLE_INSTALL_ASSEMBLIES="mono-fuse"
 INSTALLED_ASSEMBLIES="`$PKG_CONFIG --variable=Libraries $UNSTABLE_INSTALL_ASSEMBLIES`"
 AC_SUBST(INSTALLED_ASSEMBLIES)
 
-AC_CONFIG_FILES([
+AC_OUTPUT([
 src/Makefile
 Makefile
 ])
 
-AC_OUTPUT
+dnl Configuration summary
+echo ""
+echo "Configuration summary"
+echo ""
+echo "   * Installation prefix = $prefix"
+echo "   * $CS compiler: $MCS"
+echo ""
