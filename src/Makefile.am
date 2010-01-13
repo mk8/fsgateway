@@ -23,7 +23,8 @@ fsgateway_sources = AssemblyInfo.cs \
 	View.cs \
 	FsMySql.cs \
 	FsSqlServer.cs \
-	FsPostgresql.cs
+	FsPostgresql.cs \
+	FsSqlite.cs
 
 fsgateway_libs = \
 	-r:System \
@@ -31,6 +32,7 @@ fsgateway_libs = \
 	-r:Npgsql \
 	-r:Mono.Posix \
 	-r:System.Xml \
+	-r:Mono.Data.Sqlite \
 	$(MYSQL_CONNECTOR_NET_LIBS) \
 	$(MONO_FUSE_LIBS)
 
