@@ -105,8 +105,6 @@ namespace FsGateway
 				return false;
 			}
 			
-			System.Console.Out.WriteLine("ROOT="+root+" len="+root.Length+" DIR="+dir+" len="+dir.Length);
-
 			string suffix=null;
 			string[] keys=null;
 			if (dir.Length!=root.Length) {
@@ -128,7 +126,6 @@ namespace FsGateway
 						
 						name=dir+"/"+dirent.d_name;
 
-						System.Console.Out.WriteLine("Name: "+name);
 						Syscall.lstat(name,out buf);
 						if ((buf.st_mode & Mono.Unix.Native.FilePermissions.S_IFDIR)!=0) {
 							// This file is a directory
@@ -137,7 +134,6 @@ namespace FsGateway
 							if (!listTags.ContainsKey(dirent.d_name)) {
 								// Directory not present in the list
 								listTags.Add(dirent.d_name,new SortedList<string,List<string>>());
-								System.Console.Out.WriteLine("Directory name "+dirent.d_name+" added");
 							}
 						
 							// Analyze the files contained in the directory
@@ -161,8 +157,7 @@ namespace FsGateway
 								}
 							}
 						}
-//					System.Console.Out.WriteLine("\t"+NativeConvert.ToFilePermissions(buf.st_mode));
-						System.Console.Out.WriteLine("\t"+buf.st_mode.ToString());
+//						System.Console.Out.WriteLine("\t"+buf.st_mode.ToString());
 					}
 				}
 				Syscall.closedir(dirHandle);
@@ -179,7 +174,139 @@ namespace FsGateway
 			return Errno.ENODATA;
 		}		
 
+		/*********************************************************************
+		 * 
+		 * Method to get the list of tags that are embedded in the directory path.
+		 * This method setup also the out variable contents where will stored all
+		 * the SortedList where the key is the filename and the value is the list 
+		 * of all the file with full path that have the same name
+		 * 
+		 *********************************************************************/
+		 private List<string> getTagListAndContents(string directory, out SortedList<string,List<string>> contents) {
+
+			// Expand path as list of tags
+			string[] tags=directory.Substring(1).Split('/');
+			SortedList<string,List<string>> contentsPurged=null;
+			List<string> tagsList=new List<string>();
+			string key="";
+			contents=null;
+			foreach (string tag in tags) {
+					
+				// Check if is the first look
+				if (contents==null) {
+					contents=new SortedList<string,List<string>>();
+					foreach (string keyListTags in listTags[tag].Keys) {
+						contents.Add(keyListTags,listTags[tag][keyListTags]);
+					}
+						
+				} else {
+					contentsPurged=new SortedList<string,List<string>>();
+					foreach (string keyContents in contents.Keys) {
+						if (listTags[tag].ContainsKey(keyContents)) {
+							List<string> listFiles=new List<string>();
+							foreach (string fullPathName in listTags[tag][keyContents]) {
+								if (contents[keyContents].Contains(fullPathName)) {
+									listFiles.Add(fullPathName);
+								}
+							}
+							contentsPurged.Add(keyContents,listFiles);
+							
+						}
+					}
+						
+					contents=contentsPurged;
+
+					if (contents.Count<1) {
+						break;
+					}
+				}
+				tagsList.Add(tag);
+			}
+			
+			return tagsList;
+		}
+
+		
 		public Errno OnReadDirectory (string directory, OpenedPathInfo info,
+		                                          out IEnumerable<DirectoryEntry> names)
+		{
+			names=null;
+
+			// Check for root directory
+			if (directory.Equals("/")) {
+				
+				// Read all the directory tag
+				IEnumerator<string> en=listTags.Keys.GetEnumerator();
+				names=ListNames(en);
+
+			} else {
+				// Expand path as list of tags
+				SortedList<string,List<string>> contents=null;
+				List<string> tagsList=this.getTagListAndContents(directory,out contents);
+
+				IEnumerator<string> en;
+				
+				// Add other tags
+				if (contents==null) {
+					contents=new SortedList<string,List<string>>();
+				}
+
+				foreach (string listTagsKey in listTags.Keys) {
+					
+					// Check in this tags is already in the tag list
+					if (!tagsList.Contains(listTagsKey)) {
+						
+						// Check if this tag is already specify in the contents (file list)
+						// We need modify this behaviour later
+						if (!contents.ContainsKey(listTagsKey)) {
+							
+							// Check if this tag have some files with actual path
+							bool checkDir=false;
+							foreach (string filename in contents.Keys) {
+								if (listTags[listTagsKey].ContainsKey(filename)) {
+									foreach (string realFileName in listTags[listTagsKey][filename]) {
+										if (contents[filename].Contains(realFileName)) {
+											checkDir=true;
+											break;
+										}
+									}
+								}
+							}
+
+							if (checkDir) {
+								contents.Add(listTagsKey,null);
+							}
+						}
+					}
+				}
+					
+				en=contents.Keys.GetEnumerator();
+				List<string> simbolicName=new List<string>();
+				IEnumerator<string> en_link=null;
+				while (en.MoveNext()) {
+					int count=1;
+					if (contents[en.Current]!=null) {
+						en_link=contents[en.Current].GetEnumerator();
+						while (en_link.MoveNext()) {
+							while (simbolicName.Contains(en.Current + (count>1 ? " ("+count+")" : ""))) {
+								++count;
+							}
+							simbolicName.Add(en.Current + (count>1 ? " ("+count+")" : ""));
+
+						}
+					} else {
+						// Suppose to be a directory (TAG)
+						simbolicName.Add(en.Current + (count>1 ? " ("+count+")" : ""));
+					}
+
+				}
+				en_link=simbolicName.GetEnumerator();
+				names=ListNames(en_link);
+			}
+			return 0;
+		}
+	
+/*		public Errno OnReadDirectory (string directory, OpenedPathInfo info,
 		                                          out IEnumerable<DirectoryEntry> names)
 		{
 			names=null;
@@ -286,7 +413,7 @@ namespace FsGateway
 			}
 			return 0;
 		}
-
+*/
 		public Errno OnGetPathStatus (string path, out Stat stbuf)
 		{
 //			System.Console.Out.Write("DEBUG: OnGetPathStatus for "+path+" UID="+Mono.Unix.Native.Syscall.getuid()+" GID="+Mono.Unix.Native.Syscall.getgid());			
@@ -347,7 +474,7 @@ namespace FsGateway
 		}
 
 		public Errno OnReadSymbolicLink (string link, out string target) {
-			System.Console.Out.WriteLine("DEBUG: OnReadSymbolicLynk for path="+link);
+//			System.Console.Out.WriteLine("DEBUG: OnReadSymbolicLynk for path="+link);
 			
 			Regex fileMultipleRegex = null;
 			

@@ -1,3 +1,7 @@
+2010-02-06  Torello Querci  <torello@torosoft.com>
+
+		fsgateway/DirAsTag.cs: Fixed come bug when there are files with the same name in different location.
+
 2009-12-27  Torello Querci  <torello@torosoft.com>
 
 		fsgateway/FsSqlServer.cs: Added the support of SqlServer
@@ -8,4 +12,4 @@
 
 	        * configure.in: File added to be able to compile fsgateway
 
-	
+
