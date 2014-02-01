@@ -23,7 +23,6 @@ fsgateway_sources = AssemblyInfo.cs \
 	View.cs \
 	FsMySql.cs \
 	FsSqlServer.cs \
-	FsPostgresql.cs \
 	FsSqlite.cs
 
 fsgateway_libs = \
