@@ -59,7 +59,8 @@ namespace FsGateway
 		    names.Add ("/views");
 		    names.Add ("/indexes");
 		    names.Add ("/sequences");
-			
+			names.Add ("/functions");
+
 			return names;
 		}
 
@@ -189,159 +190,16 @@ namespace FsGateway
 				tableList=new SortedList<string,Table>();
 
 				IDbCommand dbcmd = dbcon.CreateCommand();
-				if (version_number_release == 8 && version_number_major >= 2) {
-					sql = "SELECT c.tableoid "
-						+ "     , c.oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , relkind "
-						+ "     , relowner as rolname "
-						+ "     , relchecks "
-//						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , relhasoids "
-						+ "     , d.refobjid as owning_tab "
-						+ "     , d.refobjsubid as owning_col "
-						+ "     , t.spcname as reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , array_to_string(c.reloptions, ', ') as reloptions "
-						+ "from pg_class c "
-						+ "left join pg_depend d on (c.relkind = 'S' and d.classid = c.tableoid and d.objid = c.oid and d.objsubid = 0 and d.refclassid = c.tableoid and d.deptype = 'a') "
-						+ "left join pg_tablespace t on t.oid = c.reltablespace "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-					//	+ "  AND pg_catalog.pg_table_is_visible(c.oid) "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by n.nspname, relname";
-				} else if (version_number_release == 8) {
-					sql = "SELECT c.tableoid "
-						+ "     , c.oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , relkind "
-						+ "     , relnamespace "
-						+ "     , relowner as rolname "
-						+ "     , relchecks "
-						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , relhasoids "
-						+ "     , d.refobjid as owning_tab "
-						+ "     , d.refobjsubid as owning_col "
-						+ "     , (SELECT spcname FROM pg_tablespace t WHERE t.oid = c.reltablespace) AS reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , NULL as reloptions  "
-						+ "from pg_class c "
-						+ "left join pg_depend d "
-						+ "  on (c.relkind = 'S' and d.classid = c.tableoid and d.objid = c.oid and d.objsubid = 0 and d.refclassid = c.tableoid and d.deptype = 'i') "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by c.oid "
-						;
-				} else if (version_number_release == 7 && version_number_major >= 3) {
-					sql = "SELECT c.tableoid "
-						+ "     , c.oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , relkind "
-						+ "     , relnamespace "
-						+ "     , relowner as rolname "
-						+ "     , relchecks "
-						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , relhasoids "
-						+ "     , d.refobjid as owning_tab "
-						+ "     , d.refobjsubid as owning_col "
-						+ "     , NULL AS reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , NULL as reloptions  "
-						+ "from pg_class c "
-						+ "left join pg_depend d "
-						+ "  on (c.relkind = 'S' and d.classid = c.tableoid and d.objid = c.oid and d.objsubid = 0 and d.refclassid = c.tableoid and d.deptype = 'i') "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by c.oid "
-						;
-				} else if (version_number_release == 7 && version_number_major >= 2) {
-					sql = "SELECT c.tableoid "
-						+ "     , c.oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , relkind "
-						+ "     , relnamespace "
-						+ "     , relowner as rolname "
-						+ "     , relchecks "
-						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , relhasoids "
-						+ "     , NULL::oid as owning_tab "
-						+ "     , NULL::int4 as owning_col "
-						+ "     , NULL AS reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , NULL as reloptions  "
-						+ "from pg_class c "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by c.oid "
-						;
-				} else if (version_number_release == 7 && version_number_major >= 1) {
-					sql = "SELECT c.tableoid "
-						+ "     , c.oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , relkind "
-						+ "     , 0::oid as relnamespace "
-						+ "     , relowner as rolname "
-						+ "     , relchecks "
-						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , relhasoids "
-						+ "     , NULL::oid as owning_tab "
-						+ "     , NULL::int4 as owning_col "
-						+ "     , NULL AS reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , NULL as reloptions  "
-						+ "from pg_class c "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by c.oid "
-						;
-				} else {
-					sql = "SELECT (SELECT oid FROM pg_class WHERE relname = 'pg_class') AS tableoid "
-						+ "     , oid "
-						+ "     , relname "
-						+ "     , relacl "
-						+ "     , CASE WHEN relhasrules and relkind = 'r' and EXISTS(SELECT rulename FROM pg_rewrite r WHERE r.ev_class = c.oid AND r.ev_type = '1') "
-						+ "                 THEN '%c'::\"char\" "
-						+ "                 ELSE relkind END AS relkind "
-						+ "     , 0::oid as relnamespace "
-						+ "     , (relowner) as rolname "
-						+ "     , relchecks "
-						+ "     , reltriggers "
-						+ "     , relhasindex "
-						+ "     , relhasrules "
-						+ "     , 't'::bool as relhasoids "
-						+ "     , NULL::oid as owning_tab "
-						+ "     , NULL::int4 as owning_col "
-						+ "     , NULL as reltablespace "
-						+ "     , n.nspname as namespace "
-						+ "     , NULL as reloptions "
-						+ "from pg_class c "
-						+ "left join pg_namespace n on n.oid = c.relnamespace "
-						+ "where relkind = 'r' "
-						+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
-						+ "order by oid"
-						;
-				}
-				
+
+				sql = "SELECT c.oid "
+					+ "     , relname "
+					+ "     , n.nspname as namespace "
+					+ "from pg_class c "
+					+ "left join pg_namespace n on n.oid = c.relnamespace "
+					+ "where relkind = 'r' "
+					+ "  and n.nspname not in ('pg_catalog', 'information_schema') "
+			        + "order by n.nspname, relname";
+					;
 				try {
 					dbcmd.CommandText = sql;
 					reader = dbcmd.ExecuteReader();
@@ -560,38 +418,56 @@ namespace FsGateway
 			
 			return sequencesList;
 		}
-		
-		/*
-		 * Just for class testing only
-		 */
-		public static void Main(string[] args)
-		{
-			Postgresql pg=new Postgresql("localhost", "affissioni", "affissioni", "", "5432");
 
-			System.Console.Out.WriteLine("Tables:");
-			SortedList<string,Table> tables=pg.getTables();
-			foreach (Table table in tables.Values) {
-				System.Console.Out.WriteLine(table.ToString());
+		public SortedList<string,Function> getFunctions() {
+
+			SortedList<string,Function> functionsList=null;
+
+			// Check for DB Connection
+			if (dbcon!=null) {
+
+				functionsList=new SortedList<string,Function>();
+
+				IDbCommand dbcmd = dbcon.CreateCommand();
+				string sql = "SELECT n.nspname as Schema " +
+				             "     , p.proname as Name " +
+				             "     , l.lanname as Language " +
+				             "     , t.typname as TypeName " +
+				             "     , t.typlen as TypeLen " +
+				             "     , p.proargnames as Parameters " +
+				             "     , p.prosrc as Source " +
+				             "FROM pg_catalog.pg_proc p " +
+				             "LEFT JOIN pg_catalog.pg_namespace n " +
+				             "  ON n.oid = p.pronamespace " +
+				             "LEFT JOIN pg_catalog.pg_language l " +
+				             "  ON l.oid = p.prolang " +
+				             "LEFT JOIN pg_catalog.pg_type t " +
+				             "  ON t.oid = p.prorettype " +
+				             "WHERE n.nspname not in ('pg_catalog', 'information_schema') ";
+				Console.WriteLine ("SQL: " + sql);
+				dbcmd.CommandText = sql;
+				IDataReader reader = dbcmd.ExecuteReader();
+				while(reader.Read()) {
+					String signature = reader.GetString(reader.GetOrdinal("Name")) + "(" + reader.GetValue(reader.GetOrdinal("Parameters")).ToString() + ")";
+					Function function=new Function(reader.GetString(reader.GetOrdinal("Schema")),signature);	
+
+					function.Script = "CREATE OR REPLACE FUNCTION  " + function.ToString () + "\n"
+					+ "RETURNS " + reader.GetString (reader.GetOrdinal ("TypeName")) + " AS \n"
+					+ "$BODY$ " + reader.GetString (reader.GetOrdinal ("Source")) + "$BODY$\n"
+					+ "LANGUAGE " + reader.GetString (reader.GetOrdinal ("Language")) + ";\n";
+
+					functionsList.Add(function.ToString(),function);
+				}
+
+				// clean up
+				reader.Close();
+				reader = null;
+				dbcmd.Dispose();
+				dbcmd = null;
 			}
 
-			System.Console.Out.WriteLine("Views:");
-			SortedList<string,View> views=pg.getViews();
-			foreach (View view in views.Values) {
-				System.Console.Out.WriteLine(view.ToString());
-			}
-		
-			System.Console.Out.WriteLine("Indexes:");
-			SortedList<string,Index> indexes=pg.getIndexes();
-			foreach (Index index in indexes.Values) {
-				System.Console.Out.WriteLine(index.ToString());
-			}
-		
-			System.Console.Out.WriteLine("Sequences:");
-			SortedList<string,Sequence> sequences=pg.getSequences();
-			foreach (Sequence sequence in sequences.Values) {
-				System.Console.Out.WriteLine(sequence.ToString());
-			}
-		
-		}		
+			return functionsList;
+		}
+
 	}
 }

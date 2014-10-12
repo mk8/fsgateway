@@ -36,6 +36,7 @@ namespace FsGateway
 		private SortedList<string,View> listViews=null;
 		private SortedList<string,Sequence> listSequences=null;
 		private SortedList<string,Table> listTables=null;
+		private SortedList<string,Function> listFunctions = null;
 
 		public FsDbManager()
 		{
@@ -119,6 +120,8 @@ namespace FsGateway
 		public Errno OnReadDirectory (string directory, OpenedPathInfo info,
 		                                          out IEnumerable<DirectoryEntry> names)
 		{
+			Console.WriteLine ("@@ OnReadDirectory:" + directory);
+
 			// Check for root directory
 			if (directory.Equals("/")) {
 				names = ListNames (directory);
@@ -134,7 +137,18 @@ namespace FsGateway
 			} else if (directory.Equals("/sequences")) {
 				listSequences=db.getSequences();
 				names = ListNames(listSequences);
+			} else if (directory.Equals("/functions")) {
+				Console.WriteLine ("@@ HIHIHIHIHI:");
+				try {
+					listFunctions=db.getFunctions();
+				} catch (Exception ex) {
+					Console.WriteLine ("Exception: " + ex.Message);
+					Console.WriteLine (ex.StackTrace);
+				}
+				Console.WriteLine ("@@ OK TRY TO CALL ListNames with " + listFunctions.Count);
+				names = ListNames(listFunctions);
 			} else {
+				Console.WriteLine ("@@ BUUUUU:");
 				names = null;
 				return Errno.ENOENT;
 			}
@@ -176,9 +190,17 @@ namespace FsGateway
 			}
 		}
 
+		private IEnumerable<DirectoryEntry> ListNames (SortedList<string,Function> list)
+		{
+			Console.WriteLine ("CHK FIRST CALL");
+			foreach (Function name in list.Values) {
+				Console.WriteLine ("CHK NAME FUNCTIONS: " + name.ToString ());
+				yield return new DirectoryEntry (name.ToString());
+			}
+		}
+
 		public Errno OnGetPathStatus (string path, out Stat stbuf)
 		{
-
 			stbuf = new Stat ();
 
 			stbuf.st_uid = Mono.Unix.Native.Syscall.getuid();
@@ -234,6 +256,14 @@ namespace FsGateway
 					} else {
 						return Errno.ENOENT;
 					}					                           
+				} else if (path.StartsWith("/functions")) {
+					string file=path.Substring(path.IndexOf("/",1)+1);
+					if (listFunctions.ContainsKey(file)) {
+						Function function=listFunctions[file];
+						stbuf.st_size=function.Script.Length;
+					} else {
+						return Errno.ENOENT;
+					}					                           
 				} else {
 					stbuf.st_mode = NativeConvert.FromUnixPermissionString ("-r--r--r--");
 				}
@@ -283,6 +313,18 @@ namespace FsGateway
 						table.Buffer.CopyTo(buf,offset);
 						bytesWritten=System.Math.Min(buf.Length,table.Buffer.Length-(int)offset);
 					} else {
+						return Errno.ENOENT;
+					}
+				} else if (file.StartsWith("/functions")) {
+					Console.WriteLine("@@@@ CHK 1");
+					string name=file.Substring(file.IndexOf("/",1)+1);
+					if (listFunctions.ContainsKey(name)) {
+						Console.WriteLine("@@@@ CHK 2");
+						Function function=listFunctions[name];
+						function.Buffer.CopyTo(buf,offset);
+						bytesWritten=System.Math.Min(buf.Length,function.Buffer.Length-(int)offset);
+					} else {
+						Console.WriteLine("@@@@ CHK 3");
 						return Errno.ENOENT;
 					}
 				}

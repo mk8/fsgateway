@@ -95,7 +95,7 @@ namespace FsGateway
 			}
 		}
 		
-		public string ToString() {
+		public override string ToString() {
 			return title + (activity != null && activity.Length > 0 ? " ("+activity+")" : "");
 		}
 	}

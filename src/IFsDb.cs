@@ -33,5 +33,6 @@ namespace FsGateway
 		SortedList<string,View> getViews();
 		SortedList<string,Index> getIndexes();
 		SortedList<string,Sequence> getSequences();
+		SortedList<string,Function> getFunctions();
 	}
 }

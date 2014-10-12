@@ -18,12 +18,12 @@ fsgateway_sources = AssemblyInfo.cs \
 	OlpcMetadata.cs \
 	Postgresql.cs \
 	Sequence.cs \
+	Function.cs \
 	SugarDatastore.cs \
 	Table.cs \
 	View.cs \
 	FsMySql.cs \
 	FsSqlServer.cs \
-	FsPostgresql.cs \
 	FsSqlite.cs
 
 fsgateway_libs = \

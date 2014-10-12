@@ -352,6 +352,12 @@ namespace FsGateway
 
 			return sequencesList;
 		}
-		
+
+		public SortedList<string,Function> getFunctions() {
+
+			SortedList<string,Function> tableList=new SortedList<string, Function>();
+			return tableList;
+		}
+				
 	}
 }

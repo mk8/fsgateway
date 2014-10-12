@@ -346,38 +346,11 @@ namespace FsGateway
 
 			return sequencesList;
 		}
-		
-		/*
-		 * Just for class testing only
-		 */
-		public static void Main(string[] args)
-		{
-			FsMySql pg=new FsMySql("localhost", "dghome", "dghome", "dghome", "3306");
 
-			System.Console.Out.WriteLine("Tables:");
-			SortedList<string,Table> tables=pg.getTables();
-			foreach (Table table in tables.Values) {
-				System.Console.Out.WriteLine(table.ToString());
-			}
+		public SortedList<string,Function> getFunctions() {
 
-			System.Console.Out.WriteLine("Views:");
-			SortedList<string,View> views=pg.getViews();
-			foreach (View view in views.Values) {
-				System.Console.Out.WriteLine(view.ToString());
-			}
-		
-			System.Console.Out.WriteLine("Indexes:");
-			SortedList<string,Index> indexes=pg.getIndexes();
-			foreach (Index index in indexes.Values) {
-				System.Console.Out.WriteLine(index.ToString());
-			}
-		
-			System.Console.Out.WriteLine("Sequences:");
-			SortedList<string,Sequence> sequences=pg.getSequences();
-			foreach (Sequence sequence in sequences.Values) {
-				System.Console.Out.WriteLine(sequence.ToString());
-			}
-		
-		}		
+			SortedList<string,Function> tableList=new SortedList<string, Function>();
+			return tableList;
+		}
 	}
 }
