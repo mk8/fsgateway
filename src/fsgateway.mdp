@@ -42,7 +42,6 @@
     <File subtype="Code" buildaction="Compile" name="FsSqlite.cs" />
     <File subtype="Code" buildaction="Compile" name="IFsModule.cs" />
     <File subtype="Code" buildaction="Compile" name="Function.cs" />
-    <File subtype="Code" buildaction="Compile" name="FsMySql.cs" />
     <File subtype="Code" buildaction="Compile" name="FsSqlServer.cs" />
   </Contents>
   <References>

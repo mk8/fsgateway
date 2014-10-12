@@ -37,8 +37,8 @@ AC_SUBST(MCS)
 dnl mono-fuse
 PKG_CHECK_MODULES(MONO_FUSE, mono-fuse >= 0.4)
 
-dnl mysql-connector-net
-PKG_CHECK_MODULES(MYSQL_CONNECTOR_NET, mysql-connector-net)
+#dnl mysql6.4
+#PKG_CHECK_MODULES(MYSQL_CONNECTOR_NET, mysql6.4 >= 6.4)
 
 dnl find assembly paths for unstable installed assemblies that will be
 dnl copied into monoskel installation directory for local usage with the app
