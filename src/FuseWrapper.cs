@@ -89,18 +89,18 @@ namespace FsGateway
 			}
 		}
 
-		protected override Errno OnReadDirectory (string directory
+		protected Errno OnReadDirectory (string directory
 		                                         ,OpenedPathInfo info
 		                                         ,out IEnumerable<DirectoryEntry> names)
 		{
 			return gw.OnReadDirectory(directory, info, out names);
 		}
 		
-		protected override Errno OnGetPathStatus (string path,out Stat stbuf) {
+		protected Errno OnGetPathStatus (string path,out Stat stbuf) {
 			return gw.OnGetPathStatus (path, out stbuf);
 		}
 		
-		protected override Errno OnReadHandle (string file
+		protected Errno OnReadHandle (string file
                                               ,OpenedPathInfo info
                                               ,byte[] buf
                                               ,long offset
@@ -113,7 +113,7 @@ namespace FsGateway
 		                                      ,out bytesWritten);
 		}
 
-		protected override Errno OnReadSymbolicLink (string link, out string target) {
+		protected Errno OnReadSymbolicLink (string link, out string target) {
 			return gw.OnReadSymbolicLink(link,out target);
 		}
 

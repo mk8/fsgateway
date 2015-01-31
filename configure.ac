@@ -15,6 +15,9 @@ dnl --- Check for mono and gmcs
 
 AC_PATH_PROG(MONO, mono)
 AC_PATH_PROG(MCS, gmcs)
+AC_PATH_PROG(CSC, mono-csc)
+
+MCS=$CSC
 
 CS="C#"
 if test "x$CSC" = "xno" -a "x$MCS" = "xno"  ; then
@@ -22,9 +25,9 @@ if test "x$CSC" = "xno" -a "x$MCS" = "xno"  ; then
 	AC_MSG_ERROR([No $CS compiler found])
 fi
 
-if test "x$MCS" = "xno" ; then
-	MCS=$CSC
-fi
+#if test "x$MCS" = "xno" ; then
+#	MCS=$CSC
+#fi
 
 if test "x$MONO" = "xno"; then
 	AC_MSG_ERROR([No mono runtime found])
@@ -36,6 +39,9 @@ AC_SUBST(MCS)
 
 dnl mono-fuse
 PKG_CHECK_MODULES(MONO_FUSE, mono-fuse >= 0.4)
+
+dnl mysql-connector-net
+PKG_CHECK_MODULES(MYSQL_CONNECTOR_NET, mysql-connector-net)
 
 #dnl mysql6.4
 #PKG_CHECK_MODULES(MYSQL_CONNECTOR_NET, mysql6.4 >= 6.4)

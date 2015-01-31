@@ -1,25 +1,16 @@
-<Project name="fsgateway" fileversion="2.0" language="C#" clr-version="Net_2_0" targetFramework="2.0" ctype="DotNetProject">
-  <MonoDevelop.Autotools.MakefileInfo RelativeMakefileName="Makefile.am" SyncReferences="True">
-    <BuildFilesVar Sync="True" Name="FILES" />
-    <DeployFilesVar />
-    <ResourcesVar Sync="True" Name="RESOURCES" />
-    <OthersVar />
-    <GacRefVar Sync="True" Name="REFERENCES" />
-    <AsmRefVar Sync="True" Name="REFERENCES" />
-    <ProjectRefVar Sync="True" Name="REFERENCES" />
-  </MonoDevelop.Autotools.MakefileInfo>
+<Project name="fsgateway" fileversion="2.0" language="C#" clr-version="Net_2_0" targetFramework="4.0" ctype="DotNetProject">
   <Configurations active="Debug">
     <Configuration name="Debug" ctype="DotNetProjectConfiguration">
       <Output directory="../bin" assembly="fsgateway" assemblyKeyFile="." />
       <Build debugmode="True" target="Exe" />
       <Execution consolepause="True" runwithwarnings="True" runtime="MsNet" clr-version="Net_2_0" />
-      <CodeGeneration compiler="Mcs" warninglevel="3" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" definesymbols="DEBUG" ctype="CSharpCompilerParameters" />
+      <CodeGeneration compiler="Mcs" warninglevel="3" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" definesymbols="DEBUG" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
     </Configuration>
     <Configuration name="Release" ctype="DotNetProjectConfiguration">
       <Output directory="bin/Release" assembly="fsgateway" />
       <Build debugmode="False" target="Exe" />
       <Execution consolepause="True" runwithwarnings="True" runtime="MsNet" clr-version="Net_2_0" />
-      <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" ctype="CSharpCompilerParameters" />
+      <CodeGeneration compiler="Mcs" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="True" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
     </Configuration>
   </Configurations>
   <Contents>
@@ -43,15 +34,26 @@
     <File subtype="Code" buildaction="Compile" name="IFsModule.cs" />
     <File subtype="Code" buildaction="Compile" name="Function.cs" />
     <File subtype="Code" buildaction="Compile" name="FsSqlServer.cs" />
+    <File subtype="Code" buildaction="Compile" name="FsMySql.cs" />
   </Contents>
+  <MonoDevelop.Autotools.MakefileInfo RelativeMakefileName="Makefile.am" SyncReferences="True">
+    <BuildFilesVar Sync="True" Name="FILES" />
+    <DeployFilesVar />
+    <ResourcesVar Sync="True" Name="RESOURCES" />
+    <OthersVar />
+    <GacRefVar Sync="True" Name="REFERENCES" />
+    <AsmRefVar Sync="True" Name="REFERENCES" />
+    <ProjectRefVar Sync="True" Name="REFERENCES" />
+  </MonoDevelop.Autotools.MakefileInfo>
   <References>
-    <ProjectReference type="Package" localcopy="True" refto="System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-    <ProjectReference type="Package" localcopy="True" refto="System.Data, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-    <ProjectReference type="Package" localcopy="True" refto="Npgsql, Version=2.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7" />
-    <ProjectReference type="Package" localcopy="True" refto="Mono.Posix, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
-    <ProjectReference type="Package" localcopy="True" refto="System.Xml, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
-    <ProjectReference type="Package" localcopy="True" refto="Mono.Data.Sqlite, Version=2.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
-    <ProjectReference type="Assembly" specificVersion="False" localcopy="True" refto="../../../../../usr/lib/mono-fuse/Mono.Fuse.dll" />
+    <ProjectReference type="Package" localcopy="True" refto="System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <ProjectReference type="Package" localcopy="True" refto="System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <ProjectReference type="Package" localcopy="True" refto="Npgsql, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5d8b90d52f46fda7" />
+    <ProjectReference type="Package" localcopy="True" refto="System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <ProjectReference type="Package" localcopy="True" refto="Mono.Data.Sqlite, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
+    <ProjectReference type="Assembly" specificVersion="False" localcopy="True" refto="../../../../../../usr/lib/mono-fuse/Mono.Fuse.dll" />
+    <ProjectReference type="Package" specificVersion="False" localcopy="False" refto="Mono.Posix, Version=4.0.0.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756" />
+    <ProjectReference type="Package" localcopy="False" refto="MySql.Data, Version=6.4.3.0, Culture=neutral, PublicKeyToken=20449f9ba87f7ae2" />
   </References>
   <LanguageParameters StartupObject="FsGateway.FsGateway" ApplicationIcon="." ctype="CSharpProjectParameters" />
 </Project>
