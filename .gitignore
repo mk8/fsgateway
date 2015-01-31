@@ -16,4 +16,6 @@ fsgateway.mds
 fsgateway.userprefs
 fsgateway.usertasks
 fsgateway/fsgateway.pidb
+config.guess
+config.sub
 
