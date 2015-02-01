@@ -16,15 +16,15 @@ fsgateway_sources = AssemblyInfo.cs \
 	IFsModule.cs \
 	Index.cs \
 	OlpcMetadata.cs \
-	Postgresql.cs \
 	Sequence.cs \
 	Function.cs \
 	SugarDatastore.cs \
 	Table.cs \
 	View.cs \
-	FsMySql.cs \
-	FsSqlServer.cs \
-	FsSqlite.cs
+	DB_MySql.cs \
+	DB_SqlServer.cs \
+	DB_Sqlite.cs \
+	DB_Postgresql.cs
 
 fsgateway_libs = \
 	-r:System \
@@ -36,7 +36,7 @@ fsgateway_libs = \
 	$(MYSQL_CONNECTOR_NET_LIBS) \
 	$(MONO_FUSE_LIBS)
 
-fsgateway_flags = -noconfig -codepage:utf8 -warn:4 -optimize+ -debug "-define:DEBUG" "-main:FsGateway.FsGateway"
+fsgateway_flags = /sdk:4 /noconfig /codepage:utf8 /warn:3 /optimize+ /debug:full "/define:DEBUG" "/main:FsGateway.FsGateway"
 
 fsgateway.exe: $(fsgateway_sources)
 	$(MCS) $(fsgateway_flags) $(fsgateway_libs) -out:$@ $(fsgateway_sources)
