@@ -22,7 +22,7 @@
     <File subtype="Code" buildaction="Compile" name="IFsDb.cs" />
     <File subtype="Code" buildaction="Compile" name="IFsGateway.cs" />
     <File subtype="Code" buildaction="Compile" name="Index.cs" />
-    <File subtype="Code" buildaction="Compile" name="Postgresql.cs" />
+    <File subtype="Code" buildaction="Compile" name="DB_Postgresql.cs" />
     <File subtype="Code" buildaction="Compile" name="Sequence.cs" />
     <File subtype="Code" buildaction="Compile" name="Table.cs" />
     <File subtype="Code" buildaction="Compile" name="View.cs" />
@@ -30,11 +30,11 @@
     <File subtype="Code" buildaction="Compile" name="SugarDatastore.cs" />
     <File subtype="Code" buildaction="Compile" name="OlpcMetadata.cs" />
     <File subtype="Code" buildaction="Compile" name="FsXml.cs" />
-    <File subtype="Code" buildaction="Compile" name="FsSqlite.cs" />
+    <File subtype="Code" buildaction="Compile" name="DB_Sqlite.cs" />
     <File subtype="Code" buildaction="Compile" name="IFsModule.cs" />
     <File subtype="Code" buildaction="Compile" name="Function.cs" />
-    <File subtype="Code" buildaction="Compile" name="FsSqlServer.cs" />
-    <File subtype="Code" buildaction="Compile" name="FsMySql.cs" />
+    <File subtype="Code" buildaction="Compile" name="DB_SqlServer.cs" />
+    <File subtype="Code" buildaction="Compile" name="DB_MySql.cs" />
   </Contents>
   <MonoDevelop.Autotools.MakefileInfo RelativeMakefileName="Makefile.am" SyncReferences="True">
     <BuildFilesVar Sync="True" Name="FILES" />

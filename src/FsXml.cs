@@ -223,8 +223,6 @@ namespace FsGateway
 
 			if (isXmlnsDeclaration(path)) {
 				stbuf.st_mode = NativeConvert.FromUnixPermissionString ("-r--r--r--");
-
-				Byte[] buffer=null;
 				System.Text.UTF8Encoding encoder=new System.Text.UTF8Encoding();
 				stbuf.st_size=encoder.GetByteCount(nsm.LookupNamespace(getXmlnsDeclaration(path)));
 			} else {
@@ -243,7 +241,6 @@ namespace FsGateway
 				} else {
 					stbuf.st_mode = NativeConvert.FromUnixPermissionString ("-r--r--r--");
 	
-					Byte[] buffer=null;
 					System.Text.UTF8Encoding encoder=new System.Text.UTF8Encoding();
 					stbuf.st_size=encoder.GetByteCount(node.Value);
 				}
@@ -252,7 +249,6 @@ namespace FsGateway
 		}
 
 		List<string> analyzeNode(XmlNode reader) {
-			string newPath="";
 			List<string> listPath=new List<string>();
 
 			if (reader==null) return listPath;

@@ -230,18 +230,27 @@ namespace FsGateway
 */		
 		public static void PrintUsage(List<Type> modules) {
 			IFsModule fsModule;
-			System.Console.Out.WriteLine("FsGateway version 0.1.2.");
+			SortedList<String, String> modulesDescription = new SortedList<string, string> ();
+
+			String appName = System.AppDomain.CurrentDomain.FriendlyName;
+
+			System.Console.Out.WriteLine("FsGateway version 0.1.2.0");
 			System.Console.Out.WriteLine("FsGateway usage\n");
-			System.Console.Out.WriteLine("\tmono fsgateway storagetype connection_string [fuse_option] mountpoint\n");
+			System.Console.Out.WriteLine("\tmono " + appName + " storagetype connection_string [fuse_option] mountpoint\n");
 			System.Console.Out.WriteLine("Where:");
 			foreach (Type type in modules) {
 				System.Reflection.ConstructorInfo ci=type.GetConstructor(new Type[0]);
 				if (ci!=null) {
 					fsModule=(IFsModule)ci.Invoke(null);
 					if (fsModule.storageType!=null) {
-						System.Console.Out.WriteLine("\t"+fsModule.storageType+"\t"+fsModule.Usage);
+						modulesDescription.Add (fsModule.storageType, fsModule.Usage);
 					}
 				}
+			}
+
+			IEnumerator<KeyValuePair<String, String>> en = modulesDescription.GetEnumerator ();
+			while (en.MoveNext()) {
+				System.Console.Out.WriteLine ("\t" + en.Current.Key + "\n\t\t" + en.Current.Value + "\n");
 			}
 		}
 		

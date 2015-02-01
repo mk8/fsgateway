@@ -25,7 +25,6 @@ using Mono.Unix.Native;
 namespace FsGateway
 {
 	
-	
 	public class FsDbManager: IFsGateway
 	{
 		private List<string> names = new List<string> ();
@@ -58,8 +57,7 @@ namespace FsGateway
 		public bool Connect() {
 			if (db==null) {
 				if (connectionString!=null && connectionString.Length>0) {
-//					IFsDb pg=new Sqlite();
-					IFsDb pg=new Postgresql();
+					IFsDb pg=new DB_Postgresql();
 					pg.Connect(connectionString);
 					this.db=pg;
 				}

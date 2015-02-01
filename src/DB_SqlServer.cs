@@ -27,18 +27,18 @@ namespace FsGateway
 {
 	
 	
-	public class FsSqlServer : IFsDb
+	public class DB_SqlServer : IFsDb
 	{
 		
 		private IDbConnection dbcon=null;
 		private string connectionString=null;
 		private bool _isConnected=false;
 
-		public FsSqlServer()
+		public DB_SqlServer()
 		{
 		}
 
-		public FsSqlServer(string host, string database, string user, string password, string port)
+		public DB_SqlServer(string host, string database, string user, string password, string port)
 		{
 
 			string connectionString = "Server="+host+","+port+";" +
@@ -65,7 +65,7 @@ namespace FsGateway
 		
 		public string storageType {
 			get {
-				return "SqlServer";
+				return "DB_SqlServer";
 			}
 		}
 		
@@ -111,12 +111,9 @@ namespace FsGateway
 		}
 		
 		public void Unconnect() {
-			bool res=false;
-			
 			if (dbcon!=null && dbcon.State==System.Data.ConnectionState.Open) {
 				dbcon.Close();
 				dbcon=null;
-				res=false;
 			}
 			
 			_isConnected=true;
@@ -159,11 +156,9 @@ namespace FsGateway
 						sql = "SELECT COLUMN_NAME, data_type, CHARACTER_MAXIMUM_LENGTH "
 							+ "FROM INFORMATION_SCHEMA.COLUMNS "
 							+ "WHERE TABLE_NAME = '"+table.Name+"'";
-						string listFilesStr="";
 						try {
 							dbcmd.CommandText = sql;
 							reader = dbcmd.ExecuteReader();
-							listFilesStr="";
 							while (reader.Read()) {
 								Field field;
 								if (reader.IsDBNull(reader.GetOrdinal("CHARACTER_MAXIMUM_LENGTH"))) {
@@ -242,11 +237,9 @@ namespace FsGateway
 							+ "FROM INFORMATION_SCHEMA.COLUMNS "
 							+ "WHERE TABLE_NAME = '"+viewDetail.Name+"'";
 						SortedList<string,Field> listFields=new SortedList<string,Field>();
-						string listFilesStr="";
 						try {
 							dbcmd.CommandText = sql;
 							reader = dbcmd.ExecuteReader();
-							listFilesStr="";
 							while (reader.Read()) {
 								Field field;
 								if (reader.IsDBNull(reader.GetOrdinal("CHARACTER_MAXIMUM_LENGTH"))) {

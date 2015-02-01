@@ -138,7 +138,6 @@ namespace FsGateway
 			string[] tags=directory.Substring(1).Split('/');
 			SortedList<string,List<string>> contentsPurged=null;
 			List<string> tagsList=new List<string>();
-			string key="";
 			contents=null;
 			foreach (string tag in tags) {
 					
@@ -406,8 +405,7 @@ namespace FsGateway
 			}
 			
 			Dirent dirent=null;
-			Stat buf;
-			
+
 			if (!dir.StartsWith(datastoreRoot)) {
 				System.Console.Out.WriteLine("Error: "+dir+" is not child of "+datastoreRoot);
 				return false;
@@ -421,7 +419,6 @@ namespace FsGateway
 				System.IntPtr dirHandle=Syscall.opendir(dir);
 				if (dirHandle!=System.IntPtr.Zero) {
 
-					buf=new Stat();
 					while ((dirent=Syscall.readdir(dirHandle))!=null) {
 
 						if (!dirent.d_name.Equals(".") && !dirent.d_name.Equals("..")) {
@@ -475,10 +472,9 @@ namespace FsGateway
 			Dirent dirent=null;
 			Stat buf;
 			List<string> element=null;
-			string storedName;
 
 			System.IntPtr dirHandle=Syscall.opendir(datastoreEntry);
-			if (dirHandle!=null && dirHandle!=System.IntPtr.Zero) {
+			if (dirHandle != System.IntPtr.Zero) {
 				buf=new Stat();
 				while ((dirent=Syscall.readdir(dirHandle))!=null) {
 					if (!dirent.d_name.Equals(".") && !dirent.d_name.Equals("..")) {
@@ -487,8 +483,6 @@ namespace FsGateway
 						name=datastoreEntry+"/"+dirent.d_name;
 						Syscall.lstat(name,out buf);
 						if ((buf.st_mode & Mono.Unix.Native.FilePermissions.S_IFREG)!=0) {
-							storedName=datastoreEntry.Substring(datastoreEntry.LastIndexOf("/")+1);
-
 							OlpcMetadata metadata=new OlpcMetadata(datastoreEntry);
 
 							string entryName=metadata.ToString();

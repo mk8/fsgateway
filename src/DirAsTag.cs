@@ -117,7 +117,7 @@ namespace FsGateway
 			}
 						
 			System.IntPtr dirHandle=Syscall.opendir(dir);
-			if (dirHandle!=null) {
+			if (dirHandle != IntPtr.Zero) {
 				
 				Dirent dirent=null;
 				Stat buf=new Stat();
@@ -188,7 +188,6 @@ namespace FsGateway
 			string[] tags=directory.Substring(1).Split('/');
 			SortedList<string,List<string>> contentsPurged=null;
 			List<string> tagsList=new List<string>();
-			string key="";
 			contents=null;
 			foreach (string tag in tags) {
 					

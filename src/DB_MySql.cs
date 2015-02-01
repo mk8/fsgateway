@@ -27,7 +27,7 @@ using System.Text.RegularExpressions;
 namespace FsGateway
 {
 	
-	public class FsMySql : IFsDb
+	public class DB_MySql : IFsDb
 	{
 		private IDbConnection dbcon=null;
 		private string connectionString=null;
@@ -36,11 +36,11 @@ namespace FsGateway
 		private int version_number_major=0; // e.s. x.3.0
 		private int version_number_minor=0; // e.s. x.x.0
 		
-		public FsMySql()
+		public DB_MySql()
 		{
 		}
 
-		public FsMySql(string host, string database, string user, string password, string port)
+		public DB_MySql(string host, string database, string user, string password, string port)
 		{
 
 			string connectionString = "Server="+host+";" +
@@ -69,7 +69,7 @@ namespace FsGateway
 		
 		public string storageType {
 			get {
-				return "MySQL5";
+				return "DB_MySQL5";
 			}
 		}
 
@@ -165,12 +165,9 @@ namespace FsGateway
 		}
 */
 		public void Unconnect() {
-			bool res=false;
-			
 			if (dbcon!=null && dbcon.State==System.Data.ConnectionState.Open) {
 				dbcon.Close();
 				dbcon=null;
-				res=false;
 			}
 			
 			_isConnected=true;

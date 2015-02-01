@@ -28,17 +28,17 @@ namespace FsGateway
 {
 	
 	
-	public class Sqlite : IFsDb
+	public class DB_Sqlite : IFsDb
 	{
 		private SqliteConnection dbcon=null;
 		private string connectionString=null;
 		private bool _isConnected=false;
 		
-		public Sqlite()
+		public DB_Sqlite()
 		{
 		}
 
-		public Sqlite(string host, string database, string user, string password, string port)
+		public DB_Sqlite(string host, string database, string user, string password, string port)
 		{
 
 			string connectionString = "Data Source="+database+"version=3";
@@ -62,7 +62,7 @@ namespace FsGateway
 		
 		public string storageType {
 			get {
-				return "sqlite";
+				return "DB_SQLite";
 			}
 		}
 
@@ -103,12 +103,9 @@ namespace FsGateway
 		}
 		
 		public void Unconnect() {
-			bool res=false;
-			
 			if (dbcon!=null && dbcon.State==System.Data.ConnectionState.Open) {
 				dbcon.Close();
 				dbcon=null;
-				res=false;
 			}
 			
 			_isConnected=true;
