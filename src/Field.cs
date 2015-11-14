@@ -28,32 +28,26 @@ namespace FsGateway
 	public class Field
 	{
 
-		private string _name="";
-		private string _type="";
-		
-		public Field() {}
+		public Field() {
+			Name = "";
+			Type = "";
+			NotNull = false;
+		}
 		
 		public Field(string name, string type) {
-			_name=name;
-			_type=type;
+			Name=name;
+			Type=type;
+			NotNull = false;
 		}
-		
-		public String Name {
-			get {
-				return _name;
-			}
-			set {
-				_name=value;
-			}
+
+		public Field(string name, string type, Boolean notNull) {
+			Name=name;
+			Type=type;
+			NotNull = notNull;
 		}
-		
-		public String Type {
-			get {
-				return _type;
-			}
-			set {
-				_type=value;
-			}
-		}
+
+		public String Name { get; set; }
+		public String Type { get; set; }
+		public bool NotNull { set; get; }
 	}
 }

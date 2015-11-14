@@ -229,6 +229,7 @@ namespace FsGateway
 						+ "left join pg_catalog.pg_type t on a.atttypid = t.oid "
 						+ "where a.attnum > 0::pg_catalog.int2 "
 						+ "  and a.attrelid = "+table.Id+ " "
+						+ "  and NOT a.attisdropped "
 						+ "order by a.attnum ";
 					string listFilesStr="";
 					try {
@@ -239,7 +240,11 @@ namespace FsGateway
 							if (!reader.IsDBNull(reader.GetOrdinal("atttypname"))) {
 								listFilesStr += "Row number: "+reader.GetValue(0).ToString()+"\n";
 								listFilesStr += "Row name: "+reader.GetValue(reader.GetOrdinal("attname")).ToString();
-								Field field=new Field(reader.GetString(reader.GetOrdinal("attname")),reader.GetString(reader.GetOrdinal("atttypname")));	
+								Field field=new Field(
+									reader.GetString(reader.GetOrdinal("attname")),
+									reader.GetString(reader.GetOrdinal("atttypname")),
+									reader.GetBoolean(reader.GetOrdinal("attnotnull"))
+								);
 								table.Fields.Add(field.Name,field);
 							}
 						}
@@ -250,7 +255,7 @@ namespace FsGateway
 							+ "(\t";
 						string separator="";
 						foreach (Field field in table.Fields.Values) {
-							table.Script += separator+field.Name+"\t"+field.Type;
+							table.Script += separator+field.Name+"\t"+field.Type + (field.NotNull ? "\tNOT NULL" : "");
 							separator=",\n\t";
 						}
 						table.Script += "\n);\n";
