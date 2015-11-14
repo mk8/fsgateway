@@ -1,3 +1,8 @@
+2015-11-14	Torello Querci  <torello@torosoft.com>
+
+		Copyright updated
+		Added support for NOT NULL indication for PostgreSQL DB.
+
 2010-02-06  Torello Querci  <torello@torosoft.com>
 
 		fsgateway/DirAsTag.cs: Fixed come bug when there are files with the same name in different location.
