@@ -18,4 +18,7 @@ fsgateway.usertasks
 fsgateway/fsgateway.pidb
 config.guess
 config.sub
+fsgateway
+src/fsgateway.exe
+src/fsgateway.exe.mdb
 
