@@ -36,6 +36,7 @@ namespace FsGateway
 		private SortedList<string,Sequence> listSequences=null;
 		private SortedList<string,Table> listTables=null;
 		private SortedList<string,Function> listFunctions = null;
+		private SortedList<string,fsgateway.Constraint> listConstraints = null;
 
 		public FsDbManager()
 		{
@@ -135,6 +136,9 @@ namespace FsGateway
 			} else if (directory.Equals("/sequences")) {
 				listSequences=db.getSequences();
 				names = ListNames(listSequences);
+			} else if (directory.Equals("/constraints")) {
+				listConstraints=db.getConstraints();
+				names = ListNames(listConstraints);
 			} else if (directory.Equals("/functions")) {
 				Console.WriteLine ("@@ HIHIHIHIHI:");
 				try {
@@ -197,6 +201,13 @@ namespace FsGateway
 			}
 		}
 
+		private IEnumerable<DirectoryEntry> ListNames (SortedList<string,fsgateway.Constraint> list)
+		{
+			foreach (fsgateway.Constraint name in list.Values) {
+				yield return new DirectoryEntry (name.ToString());
+			}
+		}
+
 		public Errno OnGetPathStatus (string path, out Stat stbuf)
 		{
 			stbuf = new Stat ();
@@ -253,12 +264,20 @@ namespace FsGateway
 						stbuf.st_size=table.Script.Length;
 					} else {
 						return Errno.ENOENT;
-					}					                           
+					}
 				} else if (path.StartsWith("/functions")) {
 					string file=path.Substring(path.IndexOf("/",1)+1);
 					if (listFunctions.ContainsKey(file)) {
 						Function function=listFunctions[file];
 						stbuf.st_size=function.Script.Length;
+					} else {
+						return Errno.ENOENT;
+					}					                           
+				} else if (path.StartsWith("/constraints")) {
+					string file=path.Substring(path.IndexOf("/",1)+1);
+					if (listConstraints.ContainsKey(file)) {
+						fsgateway.Constraint constraint=listConstraints[file];
+						stbuf.st_size=constraint.Buffer.Length;
 					} else {
 						return Errno.ENOENT;
 					}					                           
@@ -310,6 +329,15 @@ namespace FsGateway
 						Table table=listTables[name];
 						table.Buffer.CopyTo(buf,offset);
 						bytesWritten=System.Math.Min(buf.Length,table.Buffer.Length-(int)offset);
+					} else {
+						return Errno.ENOENT;
+					}
+				} else if (file.StartsWith("/constraints")) {
+					string name=file.Substring(file.IndexOf("/",1)+1);
+					if (listConstraints.ContainsKey(name)) {
+						fsgateway.Constraint constraint=listConstraints[name];
+						constraint.Buffer.CopyTo(buf,offset);
+						bytesWritten=System.Math.Min(buf.Length,constraint.Buffer.Length-(int)offset);
 					} else {
 						return Errno.ENOENT;
 					}

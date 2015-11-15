@@ -256,5 +256,13 @@ namespace FsGateway
 			return tableList;
 		}
 
+		public SortedList<string,fsgateway.Constraint> getConstraints() {
+
+			SortedList<string,fsgateway.Constraint> constraintList=null;
+			constraintList=new SortedList<string,fsgateway.Constraint>();
+
+			return constraintList;
+		}
+
 	}
 }

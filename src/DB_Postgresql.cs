@@ -60,6 +60,7 @@ namespace FsGateway
 		    names.Add ("/indexes");
 		    names.Add ("/sequences");
 			names.Add ("/functions");
+			names.Add ("/constraints");
 
 			return names;
 		}
@@ -337,7 +338,53 @@ namespace FsGateway
 					                reader.GetString(reader.GetOrdinal("indexdef"))+";\n");					                
 					indexList.Add(index.ToString(),index);
 				}
-				
+
+				/*
+				 * 
+				 * 
+SELECT c.conname, n.nspname, class1.relname as tablename, class2.relname, attribute1.attname, class3.relname, attribute2.attname --, c.*, class2.* 
+FROM (SELECT conname
+           , connamespace
+           , contype
+           , condeferrable
+           , condeferred
+           , convalidated
+           , conrelid
+           , contypid
+           , conindid
+           , confrelid
+           , confupdtype
+           , confdeltype
+           , confmatchtype
+           , conislocal
+           , coninhcount
+           , unnest(conkey) as conkey
+           , unnest(confkey) as confkey
+       FROM pg_catalog.pg_constraint
+      ) c
+
+JOIN pg_catalog.pg_namespace n
+  ON n.oid=c.connamespace
+JOIN pg_catalog.pg_class class1
+  ON c.conrelid = class1.oid
+LEFT JOIN pg_catalog.pg_class class2
+  ON c.conindid = class2.oid
+JOIN pg_catalog.pg_attribute attribute1
+  ON attribute1.attrelid = c.conrelid
+ AND attribute1.attnum = c.conkey
+
+JOIN pg_catalog.pg_class class3
+  ON c.confrelid = class3.oid
+JOIN pg_catalog.pg_attribute attribute2
+  ON attribute2.attrelid = c.confrelid
+ AND attribute2.attnum = c.confkey
+
+WHERE c.contype='f' 
+;
+
+;
+
+				 */
 				// clean up
 				reader.Close();
 				reader = null;
@@ -468,6 +515,88 @@ namespace FsGateway
 			}
 
 			return functionsList;
+		}
+
+		public SortedList<string,fsgateway.Constraint> getConstraints() {
+
+			SortedList<string,fsgateway.Constraint> constraintList=null;
+
+			// Check for DB Connection
+			if (dbcon!=null) {
+
+				constraintList=new SortedList<string,fsgateway.Constraint>();
+
+				IDbCommand dbcmd = dbcon.CreateCommand();
+				string sql = @"
+SELECT c.conname, n.nspname as schemaname, class1.relname as tablename, class2.relname, attribute1.attname as source, class3.relname as targetname, attribute2.attname as destination 
+FROM (SELECT conname
+           , connamespace
+           , contype
+           , condeferrable
+           , condeferred
+           , convalidated
+           , conrelid
+           , contypid
+           , conindid
+           , confrelid
+           , confupdtype
+           , confdeltype
+           , confmatchtype
+           , conislocal
+           , coninhcount
+           , unnest(conkey) as conkey
+           , unnest(confkey) as confkey
+      FROM pg_catalog.pg_constraint
+     ) c
+
+JOIN pg_catalog.pg_namespace n
+  ON n.oid=c.connamespace
+JOIN pg_catalog.pg_class class1
+  ON c.conrelid = class1.oid
+LEFT JOIN pg_catalog.pg_class class2
+  ON c.conindid = class2.oid
+JOIN pg_catalog.pg_attribute attribute1
+  ON attribute1.attrelid = c.conrelid
+ AND attribute1.attnum = c.conkey
+
+JOIN pg_catalog.pg_class class3
+  ON c.confrelid = class3.oid
+JOIN pg_catalog.pg_attribute attribute2
+  ON attribute2.attrelid = c.confrelid
+ AND attribute2.attnum = c.confkey
+
+WHERE c.contype='f' 
+";
+				dbcmd.CommandText = sql;
+				IDataReader reader = dbcmd.ExecuteReader();
+				while(reader.Read()) {
+					string key = reader.GetString (reader.GetOrdinal ("schemaname")) + "." +
+					             reader.GetString (reader.GetOrdinal ("tablename")) + "." +
+					             reader.GetString (reader.GetOrdinal ("conname"));
+					KeyValuePair<string, string> pair = new KeyValuePair<string, string> (
+						reader.GetString (reader.GetOrdinal ("source")),
+						reader.GetString (reader.GetOrdinal ("destination")));
+
+					if (constraintList.ContainsKey (key)) {
+						constraintList [key].FieldMapping.Add (pair);
+					} else {
+						fsgateway.Constraint constraint = new fsgateway.Constraint (reader.GetString (reader.GetOrdinal ("schemaname")),
+							                        reader.GetString (reader.GetOrdinal ("conname")),
+													reader.GetString (reader.GetOrdinal ("tablename")),
+							                        reader.GetString (reader.GetOrdinal ("targetname")));
+						constraint.FieldMapping.Add (pair);
+						constraintList.Add (key, constraint);
+					}
+				}
+
+				// clean up
+				reader.Close();
+				reader = null;
+				dbcmd.Dispose();
+				dbcmd = null;
+			}
+
+			return constraintList;
 		}
 
 	}

@@ -349,5 +349,14 @@ namespace FsGateway
 			SortedList<string,Function> tableList=new SortedList<string, Function>();
 			return tableList;
 		}
+
+		public SortedList<string,fsgateway.Constraint> getConstraints() {
+
+			SortedList<string,fsgateway.Constraint> constraintList=null;
+			constraintList=new SortedList<string,fsgateway.Constraint>();
+
+			return constraintList;
+		}
+
 	}
 }

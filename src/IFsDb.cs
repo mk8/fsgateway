@@ -34,5 +34,6 @@ namespace FsGateway
 		SortedList<string,Index> getIndexes();
 		SortedList<string,Sequence> getSequences();
 		SortedList<string,Function> getFunctions();
+		SortedList<string,fsgateway.Constraint> getConstraints();
 	}
 }
