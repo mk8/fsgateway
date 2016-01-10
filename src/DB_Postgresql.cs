@@ -339,52 +339,6 @@ namespace FsGateway
 					indexList.Add(index.ToString(),index);
 				}
 
-				/*
-				 * 
-				 * 
-SELECT c.conname, n.nspname, class1.relname as tablename, class2.relname, attribute1.attname, class3.relname, attribute2.attname --, c.*, class2.* 
-FROM (SELECT conname
-           , connamespace
-           , contype
-           , condeferrable
-           , condeferred
-           , convalidated
-           , conrelid
-           , contypid
-           , conindid
-           , confrelid
-           , confupdtype
-           , confdeltype
-           , confmatchtype
-           , conislocal
-           , coninhcount
-           , unnest(conkey) as conkey
-           , unnest(confkey) as confkey
-       FROM pg_catalog.pg_constraint
-      ) c
-
-JOIN pg_catalog.pg_namespace n
-  ON n.oid=c.connamespace
-JOIN pg_catalog.pg_class class1
-  ON c.conrelid = class1.oid
-LEFT JOIN pg_catalog.pg_class class2
-  ON c.conindid = class2.oid
-JOIN pg_catalog.pg_attribute attribute1
-  ON attribute1.attrelid = c.conrelid
- AND attribute1.attnum = c.conkey
-
-JOIN pg_catalog.pg_class class3
-  ON c.confrelid = class3.oid
-JOIN pg_catalog.pg_attribute attribute2
-  ON attribute2.attrelid = c.confrelid
- AND attribute2.attnum = c.confkey
-
-WHERE c.contype='f' 
-;
-
-;
-
-				 */
 				// clean up
 				reader.Close();
 				reader = null;

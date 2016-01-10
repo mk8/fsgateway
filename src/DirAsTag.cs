@@ -305,118 +305,8 @@ namespace FsGateway
 			return 0;
 		}
 	
-/*		public Errno OnReadDirectory (string directory, OpenedPathInfo info,
-		                                          out IEnumerable<DirectoryEntry> names)
-		{
-			names=null;
-			
-			// Check for root directory
-			if (directory.Equals("/")) {
-				
-				// Read all directory tag
-				IEnumerator<string> en=listTags.Keys.GetEnumerator();
-				names=ListNames(en);
-
-			} else {
-				// Expand path as list of tags
-				string[] tags=directory.Substring(1).Split('/');
-				SortedList<string,List<string>> contents=null;
-				SortedList<string,List<string>> contentsPurged=null;
-				IEnumerator<string> en;
-				List<string> tagsList=new List<string>();
-				string key="";
-				foreach (string tag in tags) {
-					
-					// Check if is the first look
-					if (contents==null) {
-						contents=new SortedList<string,List<string>>();
-						en=listTags[tag].Keys.GetEnumerator();
-						while (en.MoveNext()) {
-							contents.Add(en.Current,listTags[tag][en.Current]);
-						}
-					} else {
-						en=contents.Keys.GetEnumerator();
-						contentsPurged=new SortedList<string,List<string>>();
-						while (en.MoveNext()) {
-							key=en.Current;
-							if (listTags[tag].ContainsKey(key)) {
-								contentsPurged.Add(key,contents[key]);
-							}
-						}
-						
-						contents=contentsPurged;
-
-						if (contents.Count<1) {
-							break;
-						}
-					}
-					tagsList.Add(tag);
-				}
-
-				// Add other tags
-				if (contents==null) {
-					contents=new SortedList<string,List<string>>();
-					
-				}
-
-				if (contents.Count>0) {
-					en=listTags.Keys.GetEnumerator();
-					// Loop for all tags
-					while (en.MoveNext()) {
-						
-						// Check in this tags is already in the tag list
-						if (!tagsList.Contains(en.Current)) {
-							
-							// Check if this tag is already specify in the contents (file list)
-							// We need modify this behaviour later
-							if (!contents.ContainsKey(en.Current)) {
-								
-								// Check if this tag have some files with actual path
-								bool checkDir=false;
-								foreach (string filename in contents.Keys) {
-									if (listTags[en.Current].ContainsKey(filename)) {
-										checkDir=true;
-										break;
-									}
-								}
-								if (checkDir) {
-									contents.Add(en.Current,null);
-								}
-							}
-						}
-					}
-				}
-
-				en=contents.Keys.GetEnumerator();
-				List<string> simbolicName=new List<string>();
-				IEnumerator<string> en_link=null;
-				while (en.MoveNext()) {
-					int count=1;
-					if (contents[en.Current]!=null) {
-						en_link=contents[en.Current].GetEnumerator();
-						while (en_link.MoveNext()) {
-							while (simbolicName.Contains(en.Current + (count>1 ? " ("+count+")" : ""))) {
-								++count;
-							}
-							simbolicName.Add(en.Current + (count>1 ? " ("+count+")" : ""));
-
-						}
-					} else {
-						// Suppose to be a directory (TAG)
-						simbolicName.Add(en.Current + (count>1 ? " ("+count+")" : ""));
-					}
-
-				}
-				en_link=simbolicName.GetEnumerator();
-				names=ListNames(en_link);
-			}
-			return 0;
-		}
-*/
 		public Errno OnGetPathStatus (string path, out Stat stbuf)
 		{
-//			System.Console.Out.Write("DEBUG: OnGetPathStatus for "+path+" UID="+Mono.Unix.Native.Syscall.getuid()+" GID="+Mono.Unix.Native.Syscall.getgid());			
-
 			stbuf = new Stat ();
 
 			stbuf.st_uid = Mono.Unix.Native.Syscall.getuid();
@@ -427,24 +317,19 @@ namespace FsGateway
 			stbuf.st_mtime = timeval.tv_sec;
 			
 			if (path == "/") {
-//				System.Console.Out.WriteLine("path=/");			
 				stbuf.st_mode  = NativeConvert.FromUnixPermissionString ("dr-xr-xr-x");
 				stbuf.st_nlink = 1;
 				return 0;
 			}
 			if (path.IndexOf('/',1)<=0) {
-//				System.Console.Out.WriteLine("path="+path);			
 				if (!this.listTags.ContainsKey(path.Substring(1))) {
 					return Errno.ENOENT;
 				}
 
-//				System.Console.Out.WriteLine("\t okPath");			
 				stbuf.st_mode  = NativeConvert.FromUnixPermissionString ("dr-xr-xr-x");
 					stbuf.st_nlink = 1;
 				return 0;
 			} else {
-//				System.Console.Out.WriteLine("other path="+path);
-				
 				// Path split to identify if the path is a directory of it is a file
 				string[] tags=path.Substring(1).Split('/');
 				bool isDirectory=true;
@@ -473,13 +358,10 @@ namespace FsGateway
 		}
 
 		public Errno OnReadSymbolicLink (string link, out string target) {
-//			System.Console.Out.WriteLine("DEBUG: OnReadSymbolicLynk for path="+link);
-			
 			Regex fileMultipleRegex = null;
 			
 			try {
 				fileMultipleRegex = new Regex(@"(?<filename>.+)(\((?<number>[0-9]+)\)$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-//				fileMultipleRegex = new Regex(@"(?<filename>.*)(\((?<number>[0-9]+)\)$)", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 			} catch (Exception ex) {
 				System.Console.WriteLine("Exception during the Regex creation: "+ex.Message);
 			}

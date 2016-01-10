@@ -28,11 +28,6 @@ namespace FsGateway
 
 	public class Function
 	{
-		private string _schema="";
-		private string _name="";
-		private string _returnType="";
-		private string _src="";
-		private string _script="";
 		private Byte[] _buffer=null;
 
 		public Function()
@@ -40,73 +35,28 @@ namespace FsGateway
 		}
 
 		public Function(string schema, string name) {
-			_schema=schema;
-			_name=name;
+			Schema=schema;
+			Name=name;
 		}
 
-		public string Schema {
-			get {
-				return _schema;
-			}
-			set {
-				_schema=value;
-			}
-		}
-
-		public string Name {
-			get {
-				return _name;
-			}
-			set {
-				_name=value;
-			}
-		}
-
-		public string ReturnType {
-			get {
-				return _returnType;
-			}
-			set {
-				_returnType=value;
-			}
-		}
-
-		public String Src {
-			get {
-				return _src;
-			}
-			set {
-				_src=value;
-			}
-		}
-
-		public string Script {
-			get {
-				if (_script==null) {
-					/*					*****/
-				}
-				return _script;
-			}
-			set {
-				_script=value;
-
-				System.Text.UTF8Encoding encoder=new System.Text.UTF8Encoding();
-				_buffer=encoder.GetBytes(_script);
-			}
-		}
+		public string Schema { get; private set; }
+		public string Name { get; private set; }
+		public string ReturnType { get; private set; }
+		public String Src { get; private set; }
+		public string Script { get; set; }
 
 		public Byte[] Buffer {
 			get {
 				if (_buffer==null) {
 					System.Text.UTF8Encoding encoder=new System.Text.UTF8Encoding();
-					_buffer=encoder.GetBytes(_script);
+					_buffer=encoder.GetBytes(Script);
 				}
 				return _buffer;
 			}
 		}
 
 		public override string ToString() {
-			return _schema+"."+_name;
+			return Schema+"."+Name;
 		}
 	}
 }

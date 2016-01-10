@@ -26,9 +26,6 @@ namespace FsGateway
 {
 	public class View
 	{
-		private string _schema="";
-		private string _name="";
-		private string _script="";
 		private Byte[] _buffer=null;
 		
 		public View()
@@ -36,53 +33,27 @@ namespace FsGateway
 		}
 		
 		public View(string schema, string name, string script) {
-			_schema=schema;
-			_name=name;
-			_script=script;
+			Schema=schema;
+			Name=name;
+			Script=script;
 		}
 			
-		public string Schema {
-			get {
-				return _schema;
-			}
-			set {
-				_schema=value;
-			}
-		}
-		
-		public string Name {
-			get {
-				return _name;
-			}
-			set {
-				_name=value;
-			}
-		}
-			
-		public string Script {
-			get {
-				return _script;
-			}
-			set {
-				_script=value;
+		public string Schema { get; private set; }
+		public string Name { get; private set; }
+		public string Script { get; set; }
 
-				System.Text.UTF8Encoding encoder=new System.Text.UTF8Encoding();
-				_buffer=encoder.GetBytes(_script);
-			}
-		}
-		
 		public Byte[] Buffer {
 			get {
 				if (_buffer==null) {
 					System.Text.UTF8Encoding encoder=new System.Text.UTF8Encoding();
-					_buffer=encoder.GetBytes(_script);
+					_buffer=encoder.GetBytes(Script);
 				}
 				return _buffer;
 			}
 		}
 				
 		public override string ToString() {
-			return (_schema != null ? _schema + "." : "")+_name;
+			return (Schema != null ? Schema + "." : "")+Name;
 		}
 	}
 }

@@ -26,10 +26,6 @@ namespace FsGateway
 {
 	public class Index
 	{
-		private string _schema="";
-		private string _tablename="";
-		private string _name="";
-		private string _script="";
 		private Byte[] _buffer=null;
 		
 		public Index()
@@ -37,70 +33,36 @@ namespace FsGateway
 		}
 		
 		public Index(string schema, string name, string script) {
-			_schema=schema;
-			_tablename="";
-			_name=name;
-			_script=script;
+			Schema=schema;
+			TableName="";
+			Name=name;
+			Script=script;
 		}
 			
 		public Index(string schema, string tablename, string name, string script) {
-			_schema=schema;
-			_tablename=tablename;
-			_name=name;
-			_script=script;
+			Schema=schema;
+			TableName=tablename;
+			Name=name;
+			Script=script;
 		}
 		
-		public string Schema {
-			get {
-				return _schema;
-			}
-			set {
-				_schema=value;
-			}
-		}
-		
-		public string TableName {
-			get {
-				return _tablename;
-			}
-			set {
-				_tablename=value;
-			}
-		}
-			
-		public string Name {
-			get {
-				return _name;
-			}
-			set {
-				_name=value;
-			}
-		}
-			
-		public string Script {
-			get {
-				return _script;
-			}
-			set {
-				_script=value;
+		public string Schema { get; private set; }
+		public string TableName { get; private set; }
+		public string Name { get; private set; }
+		public string Script { get; set; }
 
-				System.Text.UTF8Encoding encoder=new System.Text.UTF8Encoding();
-				_buffer=encoder.GetBytes(_script);
-			}
-		}
-		
 		public Byte[] Buffer {
 			get {
-				if (_buffer ==null) {
+				if (_buffer == null) {
 					System.Text.UTF8Encoding encoder=new System.Text.UTF8Encoding();
-					_buffer=encoder.GetBytes(_script);
+					_buffer=encoder.GetBytes(Script);
 				}
 				return _buffer;
 			}
 		}
 				
 		public override string ToString() {
-			return (_schema != null ? _schema+"." : "")+_name;
+			return (Schema != null ? Schema+"." : "")+Name;
 		}
 	}
 }

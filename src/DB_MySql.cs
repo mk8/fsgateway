@@ -112,58 +112,6 @@ namespace FsGateway
 			return res;
 		}
 		
-/*
-		private string readVersionNumber() {
-			string sql="select version()";
-			string version="";
-			
-			IDbCommand dbcmd = dbcon.CreateCommand();
-			
-			dbcmd.CommandText = sql;
-			IDataReader reader = dbcmd.ExecuteReader();
-			if (!reader.Read()) {
-				reader.Close();
-				return null;
-			}
-
-			// Get the version number
-			version=reader.GetString(0);
-
-			// Parse the version number string to get the single part
-			Regex fileMultipleRegex = null;
-			
-			try {
-				fileMultipleRegex = new Regex(@"(?<postgres>[^ ]+) ((?<numberVersion>[0-9]+)\.(?<numberMajor>[0-9]+)\.(?<numberMinor>[0-9]+))", RegexOptions.Compiled | RegexOptions.IgnoreCase);
-			} catch (Exception ex) {
-				System.Console.WriteLine("Exception during the Regex creation: "+ex.Message);
-			}
-			
-			// Check for namefile with number
-			int index=0;
-			if (fileMultipleRegex!=null) {
-
-				Match match=null;
-				try {
-					match = fileMultipleRegex.Match(version);
-				} catch (Exception ex) {
-					System.Console.WriteLine("Exception during match routine. Message: "+ex.Message);
-				}
-
-				try {
-					if (match != null && match.Success) {					
-						version_number_release =System.Int32.Parse(match.Groups["numberVersion"].Value);
-						version_number_major =System.Int32.Parse(match.Groups["numberMajor"].Value);
-						version_number_minor =System.Int32.Parse(match.Groups["numberMinor"].Value);
-					}
-				} catch (Exception ex) {
-					Console.WriteLine("Exception: "+ex.Message);
-				}
-			}
-			
-			reader.Close();
-			return version;
-		}
-*/
 		public void Unconnect() {
 			if (dbcon!=null && dbcon.State==System.Data.ConnectionState.Open) {
 				dbcon.Close();
