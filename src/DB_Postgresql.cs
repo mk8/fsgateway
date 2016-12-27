@@ -201,7 +201,7 @@ namespace FsGateway
 					dbcmd.CommandText = sql;
 					reader = dbcmd.ExecuteReader();
 					while(reader.Read()) {
-						Table table=new Table(reader.GetInt64(reader.GetOrdinal("oid")),reader.GetString(reader.GetOrdinal("namespace")),reader.GetString(reader.GetOrdinal("relname")));
+						Table table=new Table(reader.GetInt32(reader.GetOrdinal("oid")),reader.GetString(reader.GetOrdinal("namespace")),reader.GetString(reader.GetOrdinal("relname")));
 						tableList.Add(table.ToString(), table);
 					}
 				} catch (Exception ex) {

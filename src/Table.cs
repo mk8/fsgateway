@@ -43,6 +43,13 @@ namespace FsGateway
 			Fields=new SortedList<string,Field>();
 		}
 		
+		public Table (Int32 id, string schema, string name) {
+			Id=Convert.ToInt64(id);
+			Schema=schema;
+			Name=name;
+
+			Fields=new SortedList<string,Field>();
+		}
 		public Table (Int64 id, string schema, string name) {
 			Id=id;
 			Schema=schema;
