@@ -1,6 +1,6 @@
 /* 
  * FsGateway - navigate a database structure as directory tree
- * Copyright (C) 2009-2015 Torello Querci <torello@torosoft.com>
+ * Copyright (C) 2009-2016 Torello Querci <tquerci@gmail.com>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace FsGateway
 
 			String appName = System.AppDomain.CurrentDomain.FriendlyName;
 
-			System.Console.Out.WriteLine("FsGateway version 0.1.2.0");
+			System.Console.Out.WriteLine("FsGateway version 0.1.3.0");
 			System.Console.Out.WriteLine("FsGateway usage\n");
 			System.Console.Out.WriteLine("\tmono " + appName + " storagetype connection_string [fuse_option] mountpoint\n");
 			System.Console.Out.WriteLine("Where:");

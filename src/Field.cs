@@ -1,6 +1,6 @@
 /* 
  * FsGateway - navigate a database structure as directory tree
- * Copyright (C) 2009-2015 Torello Querci <torello@torosoft.com>
+ * Copyright (C) 2009-2016 Torello Querci <tquerci@gmail.com>
  * 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
 using System;
 using System.Data;
 using System.Collections.Generic;
-using Npgsql;
 
 
 namespace FsGateway
