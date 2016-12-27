@@ -310,7 +310,6 @@ namespace FsGateway
 				dbcmd.Dispose();
 				dbcmd = null;
 			}
-			
 			return viewList;
 		}
 

@@ -140,7 +140,7 @@ namespace FsGateway
 				listConstraints=db.getConstraints();
 				names = ListNames(listConstraints);
 			} else if (directory.Equals("/functions")) {
-				Console.WriteLine ("@@ HIHIHIHIHI:");
+				Console.WriteLine ("@@ functions:");
 				try {
 					listFunctions=db.getFunctions();
 				} catch (Exception ex) {
@@ -150,7 +150,7 @@ namespace FsGateway
 				Console.WriteLine ("@@ OK TRY TO CALL ListNames with " + listFunctions.Count);
 				names = ListNames(listFunctions);
 			} else {
-				Console.WriteLine ("@@ BUUUUU:");
+				Console.WriteLine ("@@ TRYING TO GET AN UNSUPPORTED TYPE :");
 				names = null;
 				return Errno.ENOENT;
 			}
@@ -299,7 +299,7 @@ namespace FsGateway
 					string name=file.Substring(file.IndexOf("/",1)+1);
 					if (listIndexes.ContainsKey(name)) {
 						Index index=listIndexes[name];
-						index.Buffer.CopyTo(buf,offset);
+						Array.Copy(index.Buffer, offset, buf, 0, System.Math.Min (index.Buffer.Length - offset, buf.Length));
 						bytesWritten=System.Math.Min(buf.Length,index.Buffer.Length-(int)offset);
 						
 					} else {
@@ -309,7 +309,7 @@ namespace FsGateway
 					string name=file.Substring(file.IndexOf("/",1)+1);
 					if (listViews.ContainsKey(name)) {
 						View view=listViews[name];
-						view.Buffer.CopyTo(buf,offset);
+						Array.Copy(view.Buffer, offset, buf, 0, System.Math.Min (view.Buffer.Length - offset, buf.Length));
 						bytesWritten=System.Math.Min(buf.Length,view.Buffer.Length-(int)offset);
 					} else {
 						return Errno.ENOENT;
@@ -318,7 +318,7 @@ namespace FsGateway
 					string name=file.Substring(file.IndexOf("/",1)+1);
 					if (listSequences.ContainsKey(name)) {
 						Sequence sequence=listSequences[name];
-						sequence.Buffer.CopyTo(buf,offset);
+						Array.Copy(sequence.Buffer, offset, buf, 0, System.Math.Min (sequence.Buffer.Length - offset, buf.Length));
 						bytesWritten=System.Math.Min(buf.Length,sequence.Buffer.Length-(int)offset);
 					} else {
 						return Errno.ENOENT;
@@ -327,7 +327,7 @@ namespace FsGateway
 					string name=file.Substring(file.IndexOf("/",1)+1);
 					if (listTables.ContainsKey(name)) {
 						Table table=listTables[name];
-						table.Buffer.CopyTo(buf,offset);
+						Array.Copy(table.Buffer, offset, buf, 0, System.Math.Min (table.Buffer.Length - offset, buf.Length));
 						bytesWritten=System.Math.Min(buf.Length,table.Buffer.Length-(int)offset);
 					} else {
 						return Errno.ENOENT;
@@ -336,7 +336,7 @@ namespace FsGateway
 					string name=file.Substring(file.IndexOf("/",1)+1);
 					if (listConstraints.ContainsKey(name)) {
 						fsgateway.Constraint constraint=listConstraints[name];
-						constraint.Buffer.CopyTo(buf,offset);
+						Array.Copy(constraint.Buffer, offset, buf, 0, System.Math.Min (constraint.Buffer.Length - offset, buf.Length));
 						bytesWritten=System.Math.Min(buf.Length,constraint.Buffer.Length-(int)offset);
 					} else {
 						return Errno.ENOENT;
@@ -347,7 +347,7 @@ namespace FsGateway
 					if (listFunctions.ContainsKey(name)) {
 						Console.WriteLine("@@@@ CHK 2");
 						Function function=listFunctions[name];
-						function.Buffer.CopyTo(buf,offset);
+						Array.Copy(function.Buffer, offset, buf, 0, System.Math.Min (function.Buffer.Length - offset, buf.Length));
 						bytesWritten=System.Math.Min(buf.Length,function.Buffer.Length-(int)offset);
 					} else {
 						Console.WriteLine("@@@@ CHK 3");
@@ -356,6 +356,7 @@ namespace FsGateway
 				}
 			} catch (Exception ex) {
 				System.Console.Out.WriteLine("Exception. Message: "+ex.Message);
+				System.Console.Out.WriteLine(ex.StackTrace);
 			}
 			return 0;
 		}
